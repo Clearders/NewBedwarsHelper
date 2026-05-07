@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "org.exmple.newbedwarshelper.client.mixin.client",
+  "compatibilityLevel": "JAVA_25",
+  "client": [
+    "EntityAppearGlowingMixin",
+    "EntityOutlineColorMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}
