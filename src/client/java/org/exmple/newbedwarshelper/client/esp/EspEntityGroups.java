@@ -2,6 +2,7 @@ package org.exmple.newbedwarshelper.client.esp;
 
 import net.minecraft.world.entity.EntityType;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public final class EspEntityGroups {
@@ -111,14 +112,30 @@ public final class EspEntityGroups {
             EntityType.BAT
     ));
 
-    public static final EspEntityGroup MISC = new EspEntityGroup("screen.newbedwarshelper.esp_whitelist.group.misc", List.of(
-            EntityType.PLAYER,
-            EntityType.ARMOR_STAND,
-            EntityType.COPPER_GOLEM,
-            EntityType.IRON_GOLEM,
-            EntityType.SNOW_GOLEM,
-            EntityType.VILLAGER
-    ));
+    public static final List<EntityType<?>> BOAT_RAFT_TYPES = List.of(
+            EntityType.ACACIA_BOAT,
+            EntityType.ACACIA_CHEST_BOAT,
+            EntityType.BAMBOO_RAFT,
+            EntityType.BAMBOO_CHEST_RAFT,
+            EntityType.BIRCH_BOAT,
+            EntityType.BIRCH_CHEST_BOAT,
+            EntityType.CHERRY_BOAT,
+            EntityType.CHERRY_CHEST_BOAT,
+            EntityType.DARK_OAK_BOAT,
+            EntityType.DARK_OAK_CHEST_BOAT,
+            EntityType.JUNGLE_BOAT,
+            EntityType.JUNGLE_CHEST_BOAT,
+            EntityType.MANGROVE_BOAT,
+            EntityType.MANGROVE_CHEST_BOAT,
+            EntityType.OAK_BOAT,
+            EntityType.OAK_CHEST_BOAT,
+            EntityType.PALE_OAK_BOAT,
+            EntityType.PALE_OAK_CHEST_BOAT,
+            EntityType.SPRUCE_BOAT,
+            EntityType.SPRUCE_CHEST_BOAT
+    );
+
+    public static final EspEntityGroup MISC = new EspEntityGroup("screen.newbedwarshelper.esp_whitelist.group.misc", createMiscTypes());
 
     public static final List<EspEntityGroup> ALL = List.of(
             MONSTER,
@@ -132,5 +149,56 @@ public final class EspEntityGroups {
     );
 
     private EspEntityGroups() {
+    }
+
+    public static boolean isBoatRaftType(EntityType<?> entityType) {
+        return BOAT_RAFT_TYPES.contains(entityType);
+    }
+
+    private static List<EntityType<?>> createMiscTypes() {
+        List<EntityType<?>> entityTypes = new ArrayList<>(List.of(
+            EntityType.PLAYER,
+            EntityType.ITEM,
+            EntityType.ARMOR_STAND,
+            EntityType.ARROW,
+            EntityType.BLOCK_DISPLAY,
+            EntityType.BREEZE_WIND_CHARGE,
+            EntityType.CHEST_MINECART,
+            EntityType.COMMAND_BLOCK_MINECART,
+            EntityType.COPPER_GOLEM,
+            EntityType.EGG,
+            EntityType.ENDER_PEARL,
+            EntityType.END_CRYSTAL,
+            EntityType.EXPERIENCE_BOTTLE,
+            EntityType.EYE_OF_ENDER,
+            EntityType.FIREBALL,
+            EntityType.FIREWORK_ROCKET,
+            EntityType.FURNACE_MINECART,
+            EntityType.GLOW_ITEM_FRAME,
+            EntityType.HOPPER_MINECART,
+            EntityType.IRON_GOLEM,
+            EntityType.ITEM_DISPLAY,
+            EntityType.ITEM_FRAME,
+            EntityType.LEASH_KNOT,
+            EntityType.LINGERING_POTION,
+            EntityType.LLAMA_SPIT,
+            EntityType.MINECART,
+            EntityType.OMINOUS_ITEM_SPAWNER,
+            EntityType.SHULKER_BULLET,
+            EntityType.SMALL_FIREBALL,
+            EntityType.SNOW_GOLEM,
+            EntityType.SNOWBALL,
+            EntityType.SPAWNER_MINECART,
+            EntityType.SPECTRAL_ARROW,
+            EntityType.SPLASH_POTION,
+            EntityType.TNT,
+            EntityType.TNT_MINECART,
+            EntityType.TRIDENT,
+            EntityType.VILLAGER,
+            EntityType.WIND_CHARGE,
+            EntityType.WITHER_SKULL
+        ));
+        entityTypes.addAll(3, BOAT_RAFT_TYPES);
+        return List.copyOf(entityTypes);
     }
 }

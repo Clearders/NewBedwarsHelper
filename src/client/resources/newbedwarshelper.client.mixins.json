@@ -4,8 +4,16 @@
   "package": "org.exmple.newbedwarshelper.client.mixin.client",
   "compatibilityLevel": "JAVA_25",
   "client": [
+    "ChestOutlineMixin",
     "EntityAppearGlowingMixin",
-    "EntityOutlineColorMixin"
+    "EntityOutlineColorMixin",
+    "GuiAntiAfkHudMixin",
+    "GuiStatusEffectTimerMixin",
+    "ItemEntityOutlineMixin",
+    "LevelRendererChestOutlineMixin",
+    "ShulkerBoxOutlineMixin",
+    "WindChargeOutlineMixin",
+    "WitherSkullOutlineMixin"
   ],
   "injectors": {
     "defaultRequire": 1

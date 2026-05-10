@@ -6,8 +6,10 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.projectile.hurtingprojectile.WitherSkull;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -27,9 +29,14 @@ public final class EspTargetStorage {
     private static final Path CONFIG_PATH = FabricLoader.getInstance()
             .getConfigDir()
             .resolve("newbedwarshelper-esp-whitelist.properties");
+    private static final String DANGEROUS_WITHER_SKULL_KEY = "special_entity.dangerous_wither_skull";
 
     private static final Map<EntityType<?>, Boolean> ENTITY_WHITELIST = createDefaultWhitelist();
     private static final Map<EntityType<?>, Boolean> TEMP_ENTITY_OVERRIDES = new HashMap<>();
+    private static final Map<EspBlockEntityTarget, Boolean> BLOCK_ENTITY_WHITELIST = createDefaultBlockEntityWhitelist();
+    private static final Map<EspBlockEntityTarget, Boolean> TEMP_BLOCK_ENTITY_OVERRIDES = new HashMap<>();
+    private static boolean dangerousWitherSkullWhitelist;
+    private static Boolean temporaryDangerousWitherSkullOverride;
     private static boolean initialized;
     private static boolean globalEspEnabled;
 
@@ -52,11 +59,35 @@ public final class EspTargetStorage {
             return false;
         }
 
-        if (!(entity instanceof LivingEntity livingEntity)) {
+        if (entity instanceof WitherSkull witherSkull && witherSkull.isDangerous()) {
+            return isDangerousWitherSkullIspEnabled();
+        }
+
+        if (!(entity instanceof LivingEntity)) {
+            return entity.getType() != EntityType.ITEM && isEntityTypeIspEnabled(entity.getType());
+        }
+
+        return isEntityTypeIspEnabled(entity.getType());
+    }
+
+    public static synchronized boolean shouldGlowDroppedItem(ItemEntity entity) {
+        init();
+
+        if (!globalEspEnabled) {
             return false;
         }
 
-        return isEntityTypeIspEnabled(livingEntity.getType());
+        return isEntityTypeIspEnabled(entity.getType());
+    }
+
+    public static synchronized boolean shouldGlowBlockEntity(EspBlockEntityTarget target) {
+        init();
+
+        if (!globalEspEnabled) {
+            return false;
+        }
+
+        return isBlockEntityTargetIspEnabled(target);
     }
 
     public static synchronized boolean isEntityTypeIspEnabled(EntityType<?> entityType) {
@@ -74,9 +105,44 @@ public final class EspTargetStorage {
         return Boolean.TRUE.equals(ENTITY_WHITELIST.get(entityType));
     }
 
+    public static synchronized boolean isDangerousWitherSkullIspEnabled() {
+        init();
+        if (temporaryDangerousWitherSkullOverride != null) {
+            return temporaryDangerousWitherSkullOverride;
+        }
+
+        return dangerousWitherSkullWhitelist;
+    }
+
+    public static synchronized boolean isDangerousWitherSkullPersistentlyIspEnabled() {
+        init();
+        return dangerousWitherSkullWhitelist;
+    }
+
+    public static synchronized boolean isBlockEntityTargetIspEnabled(EspBlockEntityTarget target) {
+        init();
+        Boolean temporaryOverride = TEMP_BLOCK_ENTITY_OVERRIDES.get(target);
+        if (temporaryOverride != null) {
+            return temporaryOverride;
+        }
+
+        return Boolean.TRUE.equals(BLOCK_ENTITY_WHITELIST.get(target));
+    }
+
+    public static synchronized boolean isBlockEntityTargetPersistentlyIspEnabled(EspBlockEntityTarget target) {
+        init();
+        return Boolean.TRUE.equals(BLOCK_ENTITY_WHITELIST.get(target));
+    }
+
     public static synchronized void setEntityTypeIspEnabled(EntityType<?> entityType, boolean enabled) {
         init();
         ENTITY_WHITELIST.put(entityType, enabled);
+        saveWhitelistToDisk();
+    }
+
+    public static synchronized void setDangerousWitherSkullIspEnabled(boolean enabled) {
+        init();
+        dangerousWitherSkullWhitelist = enabled;
         saveWhitelistToDisk();
     }
 
@@ -84,6 +150,24 @@ public final class EspTargetStorage {
         init();
         for (EntityType<?> entityType : entityTypes) {
             ENTITY_WHITELIST.put(entityType, enabled);
+        }
+        if (includesWitherSkull(entityTypes)) {
+            dangerousWitherSkullWhitelist = enabled;
+        }
+
+        saveWhitelistToDisk();
+    }
+
+    public static synchronized void setBlockEntityTargetIspEnabled(EspBlockEntityTarget target, boolean enabled) {
+        init();
+        BLOCK_ENTITY_WHITELIST.put(target, enabled);
+        saveWhitelistToDisk();
+    }
+
+    public static synchronized void setBlockEntityTargetsIspEnabled(List<EspBlockEntityTarget> targets, boolean enabled) {
+        init();
+        for (EspBlockEntityTarget target : targets) {
+            BLOCK_ENTITY_WHITELIST.put(target, enabled);
         }
 
         saveWhitelistToDisk();
@@ -99,6 +183,16 @@ public final class EspTargetStorage {
         setEntityTypesIspEnabled(entityTypes, action == GroupToggleAction.ENABLE_ALL);
     }
 
+    public static synchronized GroupToggleAction getNextBlockEntityGroupToggleAction(List<EspBlockEntityTarget> targets) {
+        init();
+        return areAllBlockEntityTargetsPersistentlyEnabled(targets) ? GroupToggleAction.DISABLE_ALL : GroupToggleAction.ENABLE_ALL;
+    }
+
+    public static synchronized void applyNextBlockEntityGroupToggleAction(List<EspBlockEntityTarget> targets) {
+        GroupToggleAction action = getNextBlockEntityGroupToggleAction(targets);
+        setBlockEntityTargetsIspEnabled(targets, action == GroupToggleAction.ENABLE_ALL);
+    }
+
     public static synchronized TempToggleMode getGroupTempToggleMode(List<EntityType<?>> entityTypes) {
         init();
         Boolean expectedValue = null;
@@ -111,6 +205,17 @@ public final class EspTargetStorage {
             if (expectedValue == null) {
                 expectedValue = override;
             } else if (!expectedValue.equals(override)) {
+                return TempToggleMode.NONE;
+            }
+        }
+
+        if (includesWitherSkull(entityTypes)) {
+            if (temporaryDangerousWitherSkullOverride == null) {
+                return TempToggleMode.NONE;
+            }
+            if (expectedValue == null) {
+                expectedValue = temporaryDangerousWitherSkullOverride;
+            } else if (!expectedValue.equals(temporaryDangerousWitherSkullOverride)) {
                 return TempToggleMode.NONE;
             }
         }
@@ -132,10 +237,63 @@ public final class EspTargetStorage {
                 TEMP_ENTITY_OVERRIDES.put(entityType, mode == TempToggleMode.ALL_ON);
             }
         }
+        if (includesWitherSkull(entityTypes)) {
+            temporaryDangerousWitherSkullOverride = mode == TempToggleMode.NONE ? null : mode == TempToggleMode.ALL_ON;
+        }
+    }
+
+    public static synchronized TempToggleMode getBlockEntityGroupTempToggleMode(List<EspBlockEntityTarget> targets) {
+        init();
+        Boolean expectedValue = null;
+        for (EspBlockEntityTarget target : targets) {
+            Boolean override = TEMP_BLOCK_ENTITY_OVERRIDES.get(target);
+            if (override == null) {
+                return TempToggleMode.NONE;
+            }
+
+            if (expectedValue == null) {
+                expectedValue = override;
+            } else if (!expectedValue.equals(override)) {
+                return TempToggleMode.NONE;
+            }
+        }
+
+        return Boolean.TRUE.equals(expectedValue) ? TempToggleMode.ALL_ON : TempToggleMode.ALL_OFF;
+    }
+
+    public static synchronized void cycleBlockEntityGroupTempToggleMode(List<EspBlockEntityTarget> targets) {
+        TempToggleMode nextMode = getBlockEntityGroupTempToggleMode(targets).next();
+        setBlockEntityGroupTempToggleMode(targets, nextMode);
+    }
+
+    public static synchronized void setBlockEntityGroupTempToggleMode(List<EspBlockEntityTarget> targets, TempToggleMode mode) {
+        init();
+        for (EspBlockEntityTarget target : targets) {
+            if (mode == TempToggleMode.NONE) {
+                TEMP_BLOCK_ENTITY_OVERRIDES.remove(target);
+            } else {
+                TEMP_BLOCK_ENTITY_OVERRIDES.put(target, mode == TempToggleMode.ALL_ON);
+            }
+        }
     }
 
     public static synchronized void clearTemporaryOverrides() {
         TEMP_ENTITY_OVERRIDES.clear();
+        TEMP_BLOCK_ENTITY_OVERRIDES.clear();
+        temporaryDangerousWitherSkullOverride = null;
+    }
+
+    public static synchronized void resetWhitelistToDefaults() {
+        init();
+        ENTITY_WHITELIST.clear();
+        ENTITY_WHITELIST.putAll(createDefaultWhitelist());
+        BLOCK_ENTITY_WHITELIST.clear();
+        BLOCK_ENTITY_WHITELIST.putAll(createDefaultBlockEntityWhitelist());
+        dangerousWitherSkullWhitelist = false;
+        TEMP_ENTITY_OVERRIDES.clear();
+        TEMP_BLOCK_ENTITY_OVERRIDES.clear();
+        temporaryDangerousWitherSkullOverride = null;
+        saveWhitelistToDisk();
     }
 
     public static synchronized boolean isGlobalEspEnabled() {
@@ -158,6 +316,20 @@ public final class EspTargetStorage {
             }
         }
 
+        return !includesWitherSkull(entityTypes) || dangerousWitherSkullWhitelist;
+    }
+
+    private static boolean includesWitherSkull(List<EntityType<?>> entityTypes) {
+        return entityTypes.contains(EntityType.WITHER_SKULL);
+    }
+
+    private static boolean areAllBlockEntityTargetsPersistentlyEnabled(List<EspBlockEntityTarget> targets) {
+        for (EspBlockEntityTarget target : targets) {
+            if (!Boolean.TRUE.equals(BLOCK_ENTITY_WHITELIST.get(target))) {
+                return false;
+            }
+        }
+
         return true;
     }
 
@@ -170,7 +342,20 @@ public final class EspTargetStorage {
             }
         }
 
+        for (EntityType<?> entityType : EspEntityGroups.MISC.entityTypes()) {
+            whitelist.put(entityType, Boolean.FALSE);
+        }
+
         whitelist.put(EntityType.PLAYER, Boolean.TRUE);
+        return whitelist;
+    }
+
+    private static Map<EspBlockEntityTarget, Boolean> createDefaultBlockEntityWhitelist() {
+        Map<EspBlockEntityTarget, Boolean> whitelist = new LinkedHashMap<>();
+        for (EspBlockEntityTarget target : EspBlockEntityTarget.values()) {
+            whitelist.put(target, Boolean.FALSE);
+        }
+
         return whitelist;
     }
 
@@ -200,6 +385,22 @@ public final class EspTargetStorage {
             }
         }
 
+        for (EspBlockEntityTarget target : BLOCK_ENTITY_WHITELIST.keySet()) {
+            String value = properties.getProperty("block_entity." + target.id());
+            if (value == null) {
+                continue;
+            }
+
+            if ("true".equalsIgnoreCase(value) || "false".equalsIgnoreCase(value)) {
+                BLOCK_ENTITY_WHITELIST.put(target, Boolean.parseBoolean(value));
+            }
+        }
+
+        String dangerousWitherSkullValue = properties.getProperty(DANGEROUS_WITHER_SKULL_KEY);
+        if ("true".equalsIgnoreCase(dangerousWitherSkullValue) || "false".equalsIgnoreCase(dangerousWitherSkullValue)) {
+            dangerousWitherSkullWhitelist = Boolean.parseBoolean(dangerousWitherSkullValue);
+        }
+
         saveWhitelistToDisk();
     }
 
@@ -209,6 +410,10 @@ public final class EspTargetStorage {
             Identifier id = BuiltInRegistries.ENTITY_TYPE.getKey(entry.getKey());
             properties.setProperty(id.toString(), Boolean.toString(Boolean.TRUE.equals(entry.getValue())));
         }
+        for (Map.Entry<EspBlockEntityTarget, Boolean> entry : BLOCK_ENTITY_WHITELIST.entrySet()) {
+            properties.setProperty("block_entity." + entry.getKey().id(), Boolean.toString(Boolean.TRUE.equals(entry.getValue())));
+        }
+        properties.setProperty(DANGEROUS_WITHER_SKULL_KEY, Boolean.toString(dangerousWitherSkullWhitelist));
 
         try {
             Path parent = CONFIG_PATH.getParent();

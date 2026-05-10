@@ -7,11 +7,15 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.components.AbstractScrollArea;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.world.entity.EntityType;
+import org.exmple.newbedwarshelper.client.esp.EspBlockEntityGroup;
+import org.exmple.newbedwarshelper.client.esp.EspBlockEntityGroups;
+import org.exmple.newbedwarshelper.client.esp.EspBlockEntityTarget;
 import org.exmple.newbedwarshelper.client.esp.EspEntityGroup;
 import org.exmple.newbedwarshelper.client.esp.EspEntityGroups;
 import org.exmple.newbedwarshelper.client.esp.EspTargetStorage;
@@ -35,10 +39,15 @@ public class EspWhitelistScreen extends Screen {
     private static final Component TEMP_ALL_ON_TEXT = Component.translatable("screen.newbedwarshelper.esp_whitelist.temp_all_on");
     private static final Component TEMP_ALL_OFF_TEXT = Component.translatable("screen.newbedwarshelper.esp_whitelist.temp_all_off");
     private static final Component DONE_TEXT = Component.translatable("screen.newbedwarshelper.esp_whitelist.done");
+    private static final Component RESET_TO_DEFAULTS_TEXT = Component.translatable("screen.newbedwarshelper.esp_whitelist.reset_to_defaults");
     private static final int SEARCH_WIDTH = 260;
     private static final int ROW_HEIGHT = 22;
     private static final int ROW_TOP = 56;
-    private static final int FOOTER_HEIGHT = 36;
+    private static final int DONE_BUTTON_Y_OFFSET = 27;
+    private static final int FOOTER_BUTTON_WIDTH = 150;
+    private static final int DONE_BUTTON_HEIGHT = 20;
+    private static final int FOOTER_BUTTON_GAP = 8;
+    private static final int LIST_DONE_BUTTON_GAP = 8;
     private static final int LIST_TOP_PADDING = 0;
     private static final int LIST_BOTTOM_PADDING = 2;
     private static final int BUTTON_WIDTH = 72;
@@ -71,12 +80,16 @@ public class EspWhitelistScreen extends Screen {
         this.searchBox.setResponder(this::updateSearch);
         this.addRenderableWidget(this.searchBox);
 
+        int footerButtonsX = this.width / 2 - (FOOTER_BUTTON_WIDTH * 2 + FOOTER_BUTTON_GAP) / 2;
+        this.addRenderableWidget(Button.builder(RESET_TO_DEFAULTS_TEXT, ignored -> EspTargetStorage.resetWhitelistToDefaults())
+                .bounds(footerButtonsX, this.doneButtonY(), FOOTER_BUTTON_WIDTH, DONE_BUTTON_HEIGHT)
+                .build());
         this.addRenderableWidget(Button.builder(DONE_TEXT, ignored -> this.onClose())
-                .bounds(this.width / 2 - 100, this.height - 27, 200, 20)
+                .bounds(footerButtonsX + FOOTER_BUTTON_WIDTH + FOOTER_BUTTON_GAP, this.doneButtonY(), FOOTER_BUTTON_WIDTH, DONE_BUTTON_HEIGHT)
                 .build());
 
         int rowWidth = Math.min(360, this.width - 40);
-        int listHeight = Math.max(1, this.height - ROW_TOP - FOOTER_HEIGHT);
+        int listHeight = Math.max(1, this.listBottom() - ROW_TOP);
         this.scrollArea = this.addRenderableOnly(new ScrollArea(
                 this.width / 2 - rowWidth / 2,
                 ROW_TOP,
@@ -97,12 +110,11 @@ public class EspWhitelistScreen extends Screen {
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
-        // Do not alter the background here (user requested background unchanged).
-        // Use the standard transparent background rendering, but draw text as opaque below.
         this.extractTransparentBackground(graphics);
         this.updateRowVisibilityAndPositions();
         super.extractRenderState(graphics, mouseX, mouseY, partialTick);
         graphics.centeredText(this.font, TITLE_TEXT, this.width / 2, 10, -1);
+        this.drawListSeparators(graphics);
         this.drawVisibleRows(graphics);
     }
 
@@ -160,14 +172,12 @@ public class EspWhitelistScreen extends Screen {
     }
 
     private void updateRowVisibilityAndPositions() {
-        int visibleRows = Math.max(1, (this.height - ROW_TOP - FOOTER_HEIGHT) / ROW_HEIGHT) + 1;
         int rowWidth = Math.min(360, this.width - 40);
         double scrollAmount = this.scrollArea == null ? 0.0D : this.scrollArea.scrollAmount();
-        int start = Math.min((int) (scrollAmount / ROW_HEIGHT), Math.max(0, this.filteredRows.size() - visibleRows));
-        int end = Math.min(this.filteredRows.size(), start + visibleRows);
-        int yOffset = (int) (scrollAmount % ROW_HEIGHT);
         int listTop = ROW_TOP + LIST_TOP_PADDING;
-        int listBottom = this.height - FOOTER_HEIGHT - LIST_BOTTOM_PADDING;
+        int listBottom = this.listBottom() - LIST_BOTTOM_PADDING;
+        int start = Math.max(0, (int) (scrollAmount / ROW_HEIGHT));
+        int end = Math.min(this.filteredRows.size(), (int) Math.ceil((scrollAmount + (listBottom - listTop)) / ROW_HEIGHT) + 1);
 
         for (Row row : this.allRows) {
             if (row.enableButton != null) {
@@ -186,9 +196,8 @@ public class EspWhitelistScreen extends Screen {
 
         for (int i = start; i < end; i++) {
             Row row = this.filteredRows.get(i);
-            int rowIndex = i - start;
             int x = this.width / 2 - rowWidth / 2;
-            int y = ROW_TOP + rowIndex * ROW_HEIGHT - yOffset;
+            int y = ROW_TOP + i * ROW_HEIGHT - (int) scrollAmount;
             int right = x + rowWidth;
 
             boolean inBounds = y >= listTop && (y + ROW_HEIGHT) <= listBottom;
@@ -231,6 +240,9 @@ public class EspWhitelistScreen extends Screen {
         for (EspEntityGroup group : EspEntityGroups.ALL) {
             addGroup(group);
         }
+        for (EspBlockEntityGroup group : EspBlockEntityGroups.ALL) {
+            addBlockEntityGroup(group);
+        }
     }
 
     private void addGroup(EspEntityGroup group) {
@@ -242,7 +254,20 @@ public class EspWhitelistScreen extends Screen {
         this.addRenderableWidget(groupControls.groupToggleButton);
         this.addRenderableWidget(groupControls.tempToggleButton);
 
+        boolean addedBoatRaftRow = false;
         for (EntityType<?> entityType : group.entityTypes()) {
+            if (group == EspEntityGroups.MISC && EspEntityGroups.isBoatRaftType(entityType)) {
+                if (!addedBoatRaftRow) {
+                    Component label = Component.translatable("entity.newbedwarshelper.boat_raft");
+                    Row row = Row.entityTypes(EspEntityGroups.BOAT_RAFT_TYPES, label, "boat raft boat_raft");
+                    this.allRows.add(row);
+                    this.addRenderableWidget(row.enableButton);
+                    this.addRenderableWidget(row.disableButton);
+                    addedBoatRaftRow = true;
+                }
+                continue;
+            }
+
             Identifier id = BuiltInRegistries.ENTITY_TYPE.getKey(entityType);
             String idPath = id.getPath();
             Component label = Component.translatable("entity.newbedwarshelper." + idPath);
@@ -250,24 +275,47 @@ public class EspWhitelistScreen extends Screen {
             this.allRows.add(row);
             this.addRenderableWidget(row.enableButton);
             this.addRenderableWidget(row.disableButton);
+
+            if (group == EspEntityGroups.MISC && entityType == EntityType.WITHER_SKULL) {
+                Component dangerousLabel = Component.translatable("entity.newbedwarshelper.wither_skull_dangerous");
+                Row dangerousRow = Row.dangerousWitherSkull(dangerousLabel);
+                this.allRows.add(dangerousRow);
+                this.addRenderableWidget(dangerousRow.enableButton);
+                this.addRenderableWidget(dangerousRow.disableButton);
+            }
+        }
+    }
+
+    private void addBlockEntityGroup(EspBlockEntityGroup group) {
+        Component groupTitle = Component.translatable(group.titleKey());
+        Row header = Row.header(groupTitle);
+        this.allRows.add(header);
+        Row groupControls = Row.blockEntityGroupControls(group, groupTitle.getString());
+        this.allRows.add(groupControls);
+        this.addRenderableWidget(groupControls.groupToggleButton);
+        this.addRenderableWidget(groupControls.tempToggleButton);
+
+        for (EspBlockEntityTarget target : group.targets()) {
+            Component label = Component.translatable(target.translationKey());
+            Row row = Row.blockEntityTarget(target, label);
+            this.allRows.add(row);
+            this.addRenderableWidget(row.enableButton);
+            this.addRenderableWidget(row.disableButton);
         }
     }
 
     private void drawVisibleRows(GuiGraphicsExtractor graphics) {
-        int visibleRows = Math.max(1, (this.height - ROW_TOP - FOOTER_HEIGHT) / ROW_HEIGHT) + 1;
         int rowWidth = Math.min(360, this.width - 40);
         double scrollAmount = this.scrollArea == null ? 0.0D : this.scrollArea.scrollAmount();
-        int start = Math.min((int) (scrollAmount / ROW_HEIGHT), Math.max(0, this.filteredRows.size() - visibleRows));
-        int end = Math.min(this.filteredRows.size(), start + visibleRows);
-        int yOffset = (int) (scrollAmount % ROW_HEIGHT);
         int listTop = ROW_TOP + LIST_TOP_PADDING;
-        int listBottom = this.height - FOOTER_HEIGHT - LIST_BOTTOM_PADDING;
+        int listBottom = this.listBottom() - LIST_BOTTOM_PADDING;
+        int start = Math.max(0, (int) (scrollAmount / ROW_HEIGHT));
+        int end = Math.min(this.filteredRows.size(), (int) Math.ceil((scrollAmount + (listBottom - listTop)) / ROW_HEIGHT) + 1);
 
         for (int i = start; i < end; i++) {
             Row row = this.filteredRows.get(i);
-            int rowIndex = i - start;
             int x = this.width / 2 - rowWidth / 2;
-            int y = ROW_TOP + rowIndex * ROW_HEIGHT - yOffset;
+            int y = ROW_TOP + i * ROW_HEIGHT - (int) scrollAmount;
 
             if (y < listTop || (y + ROW_HEIGHT) > listBottom) {
                 continue;
@@ -283,23 +331,49 @@ public class EspWhitelistScreen extends Screen {
         }
     }
 
+    private void drawListSeparators(GuiGraphicsExtractor graphics) {
+        Identifier headerSeparator = this.minecraft.level == null ? Screen.HEADER_SEPARATOR : Screen.INWORLD_HEADER_SEPARATOR;
+        Identifier footerSeparator = this.minecraft.level == null ? Screen.FOOTER_SEPARATOR : Screen.INWORLD_FOOTER_SEPARATOR;
+        int listTop = ROW_TOP + LIST_TOP_PADDING;
+        int listBottom = this.listBottom();
+
+        graphics.blit(RenderPipelines.GUI_TEXTURED, headerSeparator, 0, listTop - 2, 0.0F, 0.0F, this.width, 2, 32, 2);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, footerSeparator, 0, listBottom, 0.0F, 0.0F, this.width, 2, 32, 2);
+    }
+
+    private int doneButtonY() {
+        return this.height - DONE_BUTTON_Y_OFFSET;
+    }
+
+    private int listBottom() {
+        return this.doneButtonY() - LIST_DONE_BUTTON_GAP;
+    }
+
     private static final class Row {
         private final boolean isHeader;
         private final Component label;
         private final String searchText;
         private final EntityType<?> entityType;
+        private final List<EntityType<?>> entityTypes;
+        private final boolean dangerousWitherSkull;
+        private final EspBlockEntityTarget blockEntityTarget;
         private final EspEntityGroup group;
+        private final EspBlockEntityGroup blockEntityGroup;
         private final Button enableButton;
         private final Button disableButton;
         private final Button groupToggleButton;
         private final Button tempToggleButton;
 
-        private Row(boolean isHeader, Component label, String searchText, EntityType<?> entityType, EspEntityGroup group, Button enableButton, Button disableButton, Button groupToggleButton, Button tempToggleButton) {
+        private Row(boolean isHeader, Component label, String searchText, EntityType<?> entityType, List<EntityType<?>> entityTypes, boolean dangerousWitherSkull, EspBlockEntityTarget blockEntityTarget, EspEntityGroup group, EspBlockEntityGroup blockEntityGroup, Button enableButton, Button disableButton, Button groupToggleButton, Button tempToggleButton) {
             this.isHeader = isHeader;
             this.label = label;
             this.searchText = searchText;
             this.entityType = entityType;
+            this.entityTypes = entityTypes;
+            this.dangerousWitherSkull = dangerousWitherSkull;
+            this.blockEntityTarget = blockEntityTarget;
             this.group = group;
+            this.blockEntityGroup = blockEntityGroup;
             this.enableButton = enableButton;
             this.disableButton = disableButton;
             this.groupToggleButton = groupToggleButton;
@@ -307,7 +381,7 @@ public class EspWhitelistScreen extends Screen {
         }
 
         private static Row header(Component label) {
-            return new Row(true, label, label.getString(), null, null, null, null, null, null);
+            return new Row(true, label, label.getString(), null, null, false, null, null, null, null, null, null, null);
         }
 
         private static Row groupControls(EspEntityGroup group, String groupName) {
@@ -317,7 +391,17 @@ public class EspWhitelistScreen extends Screen {
             Button tempToggleButton = Button.builder(Component.empty(), ignored -> EspTargetStorage.cycleGroupTempToggleMode(group.entityTypes()))
                     .bounds(0, 0, GROUP_BUTTON_WIDTH, 20)
                     .build();
-            return new Row(false, Component.empty(), groupName, null, group, null, null, groupToggleButton, tempToggleButton);
+            return new Row(false, Component.empty(), groupName, null, null, false, null, group, null, null, null, groupToggleButton, tempToggleButton);
+        }
+
+        private static Row blockEntityGroupControls(EspBlockEntityGroup group, String groupName) {
+            Button groupToggleButton = Button.builder(Component.empty(), ignored -> EspTargetStorage.applyNextBlockEntityGroupToggleAction(group.targets()))
+                    .bounds(0, 0, GROUP_BUTTON_WIDTH, 20)
+                    .build();
+            Button tempToggleButton = Button.builder(Component.empty(), ignored -> EspTargetStorage.cycleBlockEntityGroupTempToggleMode(group.targets()))
+                    .bounds(0, 0, GROUP_BUTTON_WIDTH, 20)
+                    .build();
+            return new Row(false, Component.empty(), groupName, null, null, false, null, null, group, null, null, groupToggleButton, tempToggleButton);
         }
 
         private static Row entity(EntityType<?> entityType, Component label, String idPath) {
@@ -328,7 +412,39 @@ public class EspWhitelistScreen extends Screen {
                     .bounds(0, 0, BUTTON_WIDTH, 20)
                     .build();
             String searchText = idPath + " " + label.getString();
-            return new Row(false, label, searchText, entityType, null, enableButton, disableButton, null, null);
+            return new Row(false, label, searchText, entityType, null, false, null, null, null, enableButton, disableButton, null, null);
+        }
+
+        private static Row entityTypes(List<EntityType<?>> entityTypes, Component label, String searchText) {
+            Button enableButton = Button.builder(ENABLE_TEXT, ignored -> EspTargetStorage.setEntityTypesIspEnabled(entityTypes, true))
+                    .bounds(0, 0, BUTTON_WIDTH, 20)
+                    .build();
+            Button disableButton = Button.builder(DISABLE_TEXT, ignored -> EspTargetStorage.setEntityTypesIspEnabled(entityTypes, false))
+                    .bounds(0, 0, BUTTON_WIDTH, 20)
+                    .build();
+            return new Row(false, label, searchText + " " + label.getString(), null, entityTypes, false, null, null, null, enableButton, disableButton, null, null);
+        }
+
+        private static Row dangerousWitherSkull(Component label) {
+            Button enableButton = Button.builder(ENABLE_TEXT, ignored -> EspTargetStorage.setDangerousWitherSkullIspEnabled(true))
+                    .bounds(0, 0, BUTTON_WIDTH, 20)
+                    .build();
+            Button disableButton = Button.builder(DISABLE_TEXT, ignored -> EspTargetStorage.setDangerousWitherSkullIspEnabled(false))
+                    .bounds(0, 0, BUTTON_WIDTH, 20)
+                    .build();
+            String searchText = "wither_skull dangerous " + label.getString();
+            return new Row(false, label, searchText, null, null, true, null, null, null, enableButton, disableButton, null, null);
+        }
+
+        private static Row blockEntityTarget(EspBlockEntityTarget target, Component label) {
+            Button enableButton = Button.builder(ENABLE_TEXT, ignored -> EspTargetStorage.setBlockEntityTargetIspEnabled(target, true))
+                    .bounds(0, 0, BUTTON_WIDTH, 20)
+                    .build();
+            Button disableButton = Button.builder(DISABLE_TEXT, ignored -> EspTargetStorage.setBlockEntityTargetIspEnabled(target, false))
+                    .bounds(0, 0, BUTTON_WIDTH, 20)
+                    .build();
+            String searchText = target.id() + " " + label.getString();
+            return new Row(false, label, searchText, null, null, false, target, null, null, enableButton, disableButton, null, null);
         }
 
         private void refreshButtons() {
@@ -336,10 +452,32 @@ public class EspWhitelistScreen extends Screen {
                 boolean enabled = EspTargetStorage.isEntityTypePersistentlyIspEnabled(this.entityType);
                 this.enableButton.active = !enabled;
                 this.disableButton.active = enabled;
+            } else if (this.entityTypes != null) {
+                boolean anyEnabled = false;
+                boolean allEnabled = true;
+                for (EntityType<?> type : this.entityTypes) {
+                    boolean enabled = EspTargetStorage.isEntityTypePersistentlyIspEnabled(type);
+                    anyEnabled |= enabled;
+                    allEnabled &= enabled;
+                }
+                this.enableButton.active = !allEnabled;
+                this.disableButton.active = anyEnabled;
+            } else if (this.dangerousWitherSkull) {
+                boolean enabled = EspTargetStorage.isDangerousWitherSkullPersistentlyIspEnabled();
+                this.enableButton.active = !enabled;
+                this.disableButton.active = enabled;
+            } else if (this.blockEntityTarget != null) {
+                boolean enabled = EspTargetStorage.isBlockEntityTargetPersistentlyIspEnabled(this.blockEntityTarget);
+                this.enableButton.active = !enabled;
+                this.disableButton.active = enabled;
             } else if (this.group != null) {
                 EspTargetStorage.GroupToggleAction action = EspTargetStorage.getNextGroupToggleAction(this.group.entityTypes());
                 this.groupToggleButton.setMessage(action == EspTargetStorage.GroupToggleAction.ENABLE_ALL ? GROUP_ENABLE_ALL_TEXT : GROUP_DISABLE_ALL_TEXT);
                 this.tempToggleButton.setMessage(getTempToggleText(EspTargetStorage.getGroupTempToggleMode(this.group.entityTypes())));
+            } else if (this.blockEntityGroup != null) {
+                EspTargetStorage.GroupToggleAction action = EspTargetStorage.getNextBlockEntityGroupToggleAction(this.blockEntityGroup.targets());
+                this.groupToggleButton.setMessage(action == EspTargetStorage.GroupToggleAction.ENABLE_ALL ? GROUP_ENABLE_ALL_TEXT : GROUP_DISABLE_ALL_TEXT);
+                this.tempToggleButton.setMessage(getTempToggleText(EspTargetStorage.getBlockEntityGroupTempToggleMode(this.blockEntityGroup.targets())));
             }
         }
 
@@ -359,7 +497,7 @@ public class EspWhitelistScreen extends Screen {
 
         @Override
         protected int contentHeight() {
-            return EspWhitelistScreen.this.filteredRows.size() * ROW_HEIGHT;
+            return EspWhitelistScreen.this.filteredRows.size() * ROW_HEIGHT + LIST_BOTTOM_PADDING;
         }
 
         @Override
@@ -384,7 +522,6 @@ public class EspWhitelistScreen extends Screen {
 
         @Override
         protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
-            // No narration for the scrollbar itself.
         }
     }
 }

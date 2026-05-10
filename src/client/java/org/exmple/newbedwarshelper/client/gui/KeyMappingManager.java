@@ -8,6 +8,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import org.exmple.newbedwarshelper.ModConstants;
+import org.exmple.newbedwarshelper.client.antiafk.AntiAFKManager;
 import org.exmple.newbedwarshelper.client.esp.EspTargetStorage;
 import org.lwjgl.glfw.GLFW;
 
@@ -25,6 +26,11 @@ public class KeyMappingManager {
             GLFW.GLFW_KEY_U,
             CUSTOM_KEY_CATEGORY
     );
+    private static final KeyMapping TOGGLE_ANTI_AFK_KEY = new KeyMapping(
+            "key.newbedwarshelper.toggle_anti_afk",
+            GLFW.GLFW_KEY_F8,
+            CUSTOM_KEY_CATEGORY
+    );
     private static boolean initialized;
     private static boolean resetOnNextJoin = true;
 
@@ -35,6 +41,7 @@ public class KeyMappingManager {
 
         KeyMappingHelper.registerKeyMapping(OPEN_ESP_WHITELIST_CONFIG_KEY);
         KeyMappingHelper.registerKeyMapping(TOGGLE_GLOBAL_ESP_KEY);
+        KeyMappingHelper.registerKeyMapping(TOGGLE_ANTI_AFK_KEY);
         ClientTickEvents.END_CLIENT_TICK.register(KeyMappingManager::onClientTick);
         initialized = true;
     }
@@ -48,7 +55,7 @@ public class KeyMappingManager {
         }
 
         while (OPEN_ESP_WHITELIST_CONFIG_KEY.consumeClick()) {
-            client.setScreen(new EspWhitelistScreen(client, client.screen));
+            client.setScreen(new ModScreen(client, client.screen));
         }
 
         while (TOGGLE_GLOBAL_ESP_KEY.consumeClick()) {
@@ -61,5 +68,11 @@ public class KeyMappingManager {
                 client.player.sendOverlayMessage(text);
             }
         }
+
+        while (TOGGLE_ANTI_AFK_KEY.consumeClick()) {
+            AntiAFKManager.toggle();
+        }
+
+        AntiAFKManager.update(client.player);
     }
 }
