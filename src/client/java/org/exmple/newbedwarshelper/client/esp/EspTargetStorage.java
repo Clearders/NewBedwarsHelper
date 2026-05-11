@@ -1,7 +1,5 @@
 package org.exmple.newbedwarshelper.client.esp;
 
-import com.mojang.logging.LogUtils;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
@@ -10,27 +8,15 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.projectile.hurtingprojectile.WitherSkull;
-import org.slf4j.Logger;
+import org.exmple.newbedwarshelper.client.z_config.ModConfig;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 public final class EspTargetStorage {
-    private static final Logger LOGGER = LogUtils.getLogger();
-    private static final Path CONFIG_PATH = FabricLoader.getInstance()
-            .getConfigDir()
-            .resolve("newbedwarshelper-esp-whitelist.properties");
-    private static final String DANGEROUS_WITHER_SKULL_KEY = "special_entity.dangerous_wither_skull";
-
     private static final Map<EntityType<?>, Boolean> ENTITY_WHITELIST = createDefaultWhitelist();
     private static final Map<EntityType<?>, Boolean> TEMP_ENTITY_OVERRIDES = new HashMap<>();
     private static final Map<EspBlockEntityTarget, Boolean> BLOCK_ENTITY_WHITELIST = createDefaultBlockEntityWhitelist();
@@ -360,73 +346,42 @@ public final class EspTargetStorage {
     }
 
     public static synchronized void loadWhitelistFromDisk() {
-        if (!Files.isRegularFile(CONFIG_PATH)) {
-            saveWhitelistToDisk();
-            return;
-        }
-
-        Properties properties = new Properties();
-        try (InputStream inputStream = Files.newInputStream(CONFIG_PATH)) {
-            properties.load(inputStream);
-        } catch (IOException exception) {
-            LOGGER.warn("Failed to read ESP whitelist config: {}", CONFIG_PATH, exception);
-            return;
-        }
+        ModConfig.EspConfig config = ModConfig.getInstance().esp;
 
         for (EntityType<?> entityType : ENTITY_WHITELIST.keySet()) {
             Identifier id = BuiltInRegistries.ENTITY_TYPE.getKey(entityType);
-            String value = properties.getProperty(id.toString());
-            if (value == null) {
-                continue;
-            }
-
-            if ("true".equalsIgnoreCase(value) || "false".equalsIgnoreCase(value)) {
-                ENTITY_WHITELIST.put(entityType, Boolean.parseBoolean(value));
+            Boolean value = config.entityWhitelist.get(id.toString());
+            if (value != null) {
+                ENTITY_WHITELIST.put(entityType, value);
             }
         }
 
         for (EspBlockEntityTarget target : BLOCK_ENTITY_WHITELIST.keySet()) {
-            String value = properties.getProperty("block_entity." + target.id());
-            if (value == null) {
-                continue;
-            }
-
-            if ("true".equalsIgnoreCase(value) || "false".equalsIgnoreCase(value)) {
-                BLOCK_ENTITY_WHITELIST.put(target, Boolean.parseBoolean(value));
+            Boolean value = config.blockEntityWhitelist.get(target.id());
+            if (value != null) {
+                BLOCK_ENTITY_WHITELIST.put(target, value);
             }
         }
 
-        String dangerousWitherSkullValue = properties.getProperty(DANGEROUS_WITHER_SKULL_KEY);
-        if ("true".equalsIgnoreCase(dangerousWitherSkullValue) || "false".equalsIgnoreCase(dangerousWitherSkullValue)) {
-            dangerousWitherSkullWhitelist = Boolean.parseBoolean(dangerousWitherSkullValue);
-        }
+        dangerousWitherSkullWhitelist = config.dangerousWitherSkullWhitelist;
 
         saveWhitelistToDisk();
     }
 
     public static synchronized void saveWhitelistToDisk() {
-        Properties properties = new Properties();
+        ModConfig config = ModConfig.getInstance();
+        config.esp.entityWhitelist.clear();
+        config.esp.blockEntityWhitelist.clear();
+
         for (Map.Entry<EntityType<?>, Boolean> entry : ENTITY_WHITELIST.entrySet()) {
             Identifier id = BuiltInRegistries.ENTITY_TYPE.getKey(entry.getKey());
-            properties.setProperty(id.toString(), Boolean.toString(Boolean.TRUE.equals(entry.getValue())));
+            config.esp.entityWhitelist.put(id.toString(), Boolean.TRUE.equals(entry.getValue()));
         }
         for (Map.Entry<EspBlockEntityTarget, Boolean> entry : BLOCK_ENTITY_WHITELIST.entrySet()) {
-            properties.setProperty("block_entity." + entry.getKey().id(), Boolean.toString(Boolean.TRUE.equals(entry.getValue())));
+            config.esp.blockEntityWhitelist.put(entry.getKey().id(), Boolean.TRUE.equals(entry.getValue()));
         }
-        properties.setProperty(DANGEROUS_WITHER_SKULL_KEY, Boolean.toString(dangerousWitherSkullWhitelist));
-
-        try {
-            Path parent = CONFIG_PATH.getParent();
-            if (parent != null) {
-                Files.createDirectories(parent);
-            }
-
-            try (OutputStream outputStream = Files.newOutputStream(CONFIG_PATH)) {
-                properties.store(outputStream, "NewBedwarsHelper ESP whitelist");
-            }
-        } catch (IOException exception) {
-            LOGGER.warn("Failed to write ESP whitelist config: {}", CONFIG_PATH, exception);
-        }
+        config.esp.dangerousWitherSkullWhitelist = dangerousWitherSkullWhitelist;
+        config.save();
     }
 
     public enum GroupToggleAction {

@@ -41,6 +41,7 @@ dependencies {
     implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
     implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    include implementation("org.jsoup:jsoup:1.18.3")
 }
 
 processResources {

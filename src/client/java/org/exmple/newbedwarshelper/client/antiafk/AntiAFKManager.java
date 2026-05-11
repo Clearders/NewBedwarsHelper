@@ -4,20 +4,12 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.phys.Vec3;
+import org.exmple.newbedwarshelper.client.z_config.ModConfig;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Random;
-import java.util.Properties;
 
 public final class AntiAFKManager {
     private static final Random RANDOM = new Random();
-    private static final Path CONFIG_PATH = Minecraft.getInstance().gameDirectory.toPath()
-            .resolve("config")
-            .resolve("newbedwarshelper-antiafk.properties");
 
     private static boolean featureEnabled = true;
     private static boolean enabled = false;
@@ -33,10 +25,6 @@ public final class AntiAFKManager {
     private static Vec3 smartMoveStartPos = null;
 
     private AntiAFKManager() {
-    }
-
-    static {
-        load();
     }
 
     private enum Direction {
@@ -205,35 +193,19 @@ public final class AntiAFKManager {
         smartMoveStartPos = null;
     }
 
-    private static void load() {
-        Properties properties = new Properties();
-        if (Files.exists(CONFIG_PATH)) {
-            try (InputStream inputStream = Files.newInputStream(CONFIG_PATH)) {
-                properties.load(inputStream);
-            } catch (IOException ignored) {
-                // Keep defaults if the optional config file cannot be read.
-            }
-        }
-
-        featureEnabled = Boolean.parseBoolean(properties.getProperty("featureEnabled", "true"));
-        smallIcon = Boolean.parseBoolean(properties.getProperty("smallIcon", "true"));
+    public static void init() {
+        ModConfig.AntiAfkConfig config = ModConfig.getInstance().antiAfk;
+        featureEnabled = config.featureEnabled;
+        smallIcon = config.smallIcon;
         if (!featureEnabled) {
             enabled = false;
         }
     }
 
     private static void save() {
-        Properties properties = new Properties();
-        properties.setProperty("featureEnabled", Boolean.toString(featureEnabled));
-        properties.setProperty("smallIcon", Boolean.toString(smallIcon));
-
-        try {
-            Files.createDirectories(CONFIG_PATH.getParent());
-            try (OutputStream outputStream = Files.newOutputStream(CONFIG_PATH)) {
-                properties.store(outputStream, "NewBedwarsHelper Anti-AFK");
-            }
-        } catch (IOException ignored) {
-            // Runtime state should still work even if config persistence fails.
-        }
+        ModConfig config = ModConfig.getInstance();
+        config.antiAfk.featureEnabled = featureEnabled;
+        config.antiAfk.smallIcon = smallIcon;
+        config.save();
     }
 }

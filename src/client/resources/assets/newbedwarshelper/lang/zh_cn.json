@@ -190,7 +190,17 @@
   "key.newbedwarshelper.open_esp_whitelist_config": "打开 ESP 白名单",
   "key.newbedwarshelper.toggle_global_esp": "切换全局 ESP",
   "key.newbedwarshelper.toggle_anti_afk": "切换防AFK",
-  "key.category.newbedwarshelper.bed_wars_helper": "NewBedwarsHelper"
+  "key.category.newbedwarshelper.bed_wars_helper": "NewBedwarsHelper",
+  "statsfetcher.newbedwarshelper.not_found": "数据未找到",
+  "commands.newbedwarshelper.web.usage": "正确用法: /web <玩家名>",
+  "commands.newbedwarshelper.statsfetcher.player_may_be_nicked": "此玩家可能已匿名!",
+  "commands.newbedwarshelper.weball.threshold.current": "当前危险玩家FKDR阈值: ",
+  "commands.newbedwarshelper.weball.threshold.invalid": "无效的阈值. 阈值必须大于0.0",
+  "commands.newbedwarshelper.weball.threshold.set": "危险玩家FKDR阈值已设为: ",
+  "commands.newbedwarshelper.weball.threshold.reset": "危险玩家FKDR阈值已重置为: ",
+  "commands.newbedwarshelper.weball.summary": "已完成对所有在线玩家的数据抓取. 共用时%s秒",
+  "commands.newbedwarshelper.weball.dangerous_players": "危险玩家:",
+  "commands.newbedwarshelper.weball.failed": "抓取失败: %s"
 
 
 }

@@ -190,5 +190,15 @@
   "key.newbedwarshelper.open_esp_whitelist_config": "Open ESP Whitelist",
   "key.newbedwarshelper.toggle_global_esp": "Toggle Global ESP",
   "key.newbedwarshelper.toggle_anti_afk": "Toggle Anti-AFK",
-  "key.category.newbedwarshelper.bed_wars_helper": "NewBedwarsHelper"
+  "key.category.newbedwarshelper.bed_wars_helper": "NewBedwarsHelper",
+  "statsfetcher.newbedwarshelper.not_found": "Stats Not Found",
+  "commands.newbedwarshelper.web.usage": "Correct usage: /web <Username>",
+  "commands.newbedwarshelper.statsfetcher.player_may_be_nicked": "This player may be nicked!",
+  "commands.newbedwarshelper.weball.threshold.current": "Current Dangerous Players FKDR Threshold: ",
+  "commands.newbedwarshelper.weball.threshold.invalid": "Invalid threshold value. Must be greater than 0.0",
+  "commands.newbedwarshelper.weball.threshold.set": "Dangerous Players FKDR Threshold set to: ",
+  "commands.newbedwarshelper.weball.threshold.reset": "Dangerous Players FKDR Threshold reset to default: ",
+  "commands.newbedwarshelper.weball.summary": "Finished fetching stats for all online players. Took %s seconds",
+  "commands.newbedwarshelper.weball.dangerous_players": "Dangerous Players:",
+  "commands.newbedwarshelper.weball.failed": "Failed: %s"
 }
