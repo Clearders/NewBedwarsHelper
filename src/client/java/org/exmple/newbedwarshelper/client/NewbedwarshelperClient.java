@@ -5,6 +5,8 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import org.exmple.newbedwarshelper.client.antiafk.AntiAFKManager;
 import org.exmple.newbedwarshelper.client.esp.EspTargetStorage;
 import org.exmple.newbedwarshelper.client.gui.KeyMappingManager;
+import org.exmple.newbedwarshelper.client.hitboxenhance.HitboxEnhanceTargetStorage;
+import org.exmple.newbedwarshelper.client.isp.IspTargetStorage;
 import org.exmple.newbedwarshelper.client.utils.AsyncExecutor;
 import org.exmple.newbedwarshelper.client.z_commands.statsfetcher.WebCommand;
 import org.exmple.newbedwarshelper.client.z_commands.statsfetcher.WeballCommand;
@@ -16,10 +18,14 @@ public class NewbedwarshelperClient implements ClientModInitializer {
         AntiAFKManager.init();
         KeyMappingManager.init();
         EspTargetStorage.init();
+        HitboxEnhanceTargetStorage.init();
+        IspTargetStorage.init();
         WebCommand.register();
         WeballCommand.register();
         ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {
             EspTargetStorage.clearTemporaryOverrides();
+            HitboxEnhanceTargetStorage.clearTemporaryOverrides();
+            IspTargetStorage.clearTemporaryOverrides();
             AsyncExecutor.shutdown();
         });
     }

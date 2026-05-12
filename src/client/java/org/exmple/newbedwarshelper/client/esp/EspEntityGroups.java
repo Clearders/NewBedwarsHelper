@@ -182,6 +182,7 @@ public final class EspEntityGroups {
             EntityType.LEASH_KNOT,
             EntityType.LINGERING_POTION,
             EntityType.LLAMA_SPIT,
+            EntityType.MANNEQUIN,
             EntityType.MINECART,
             EntityType.OMINOUS_ITEM_SPAWNER,
             EntityType.SHULKER_BULLET,

@@ -29,7 +29,7 @@ public final class EspEntityColors {
     }
 
     public static int getOutlineColorOrDefault(Entity entity, int defaultColor) {
-        if (entity instanceof Player || !EspTargetStorage.shouldGlow(entity)) {
+        if (entity instanceof Player || entity.getType() == EntityType.MANNEQUIN || !EspTargetStorage.shouldGlow(entity)) {
             return defaultColor;
         }
 

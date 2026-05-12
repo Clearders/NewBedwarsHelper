@@ -19,6 +19,8 @@ public class ModConfig {
 
     public AntiAfkConfig antiAfk = new AntiAfkConfig();
     public EspConfig esp = new EspConfig();
+    public HitboxEnhanceConfig hitboxEnhance = new HitboxEnhanceConfig();
+    public IspConfig isp = new IspConfig();
     public StatsFetcherConfig statsFetcher = new StatsFetcherConfig();
 
     public static ModConfig getInstance() {
@@ -71,10 +73,18 @@ public class ModConfig {
         if (esp == null) {
             esp = new EspConfig();
         }
+        if (hitboxEnhance == null) {
+            hitboxEnhance = new HitboxEnhanceConfig();
+        }
+        if (isp == null) {
+            isp = new IspConfig();
+        }
         if (statsFetcher == null) {
             statsFetcher = new StatsFetcherConfig();
         }
         esp.ensureDefaults();
+        hitboxEnhance.ensureDefaults();
+        isp.ensureDefaults();
     }
 
     private static Path getConfigPath() {
@@ -97,6 +107,27 @@ public class ModConfig {
             }
             if (blockEntityWhitelist == null) {
                 blockEntityWhitelist = new LinkedHashMap<>();
+            }
+        }
+    }
+
+    public static class HitboxEnhanceConfig {
+        public Map<String, Boolean> entityWhitelist = new LinkedHashMap<>();
+        public boolean dangerousWitherSkullWhitelist = true;
+
+        private void ensureDefaults() {
+            if (entityWhitelist == null) {
+                entityWhitelist = new LinkedHashMap<>();
+            }
+        }
+    }
+
+    public static class IspConfig {
+        public Map<String, Boolean> entityWhitelist = new LinkedHashMap<>();
+
+        private void ensureDefaults() {
+            if (entityWhitelist == null) {
+                entityWhitelist = new LinkedHashMap<>();
             }
         }
     }
