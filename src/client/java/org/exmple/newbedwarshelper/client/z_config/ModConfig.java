@@ -21,6 +21,7 @@ public class ModConfig {
     public EspConfig esp = new EspConfig();
     public HitboxEnhanceConfig hitboxEnhance = new HitboxEnhanceConfig();
     public IspConfig isp = new IspConfig();
+    public ItemModelEnhanceConfig itemModelEnhance = new ItemModelEnhanceConfig();
     public StatsFetcherConfig statsFetcher = new StatsFetcherConfig();
 
     public static ModConfig getInstance() {
@@ -79,12 +80,16 @@ public class ModConfig {
         if (isp == null) {
             isp = new IspConfig();
         }
+        if (itemModelEnhance == null) {
+            itemModelEnhance = new ItemModelEnhanceConfig();
+        }
         if (statsFetcher == null) {
             statsFetcher = new StatsFetcherConfig();
         }
         esp.ensureDefaults();
         hitboxEnhance.ensureDefaults();
         isp.ensureDefaults();
+        itemModelEnhance.ensureDefaults();
     }
 
     private static Path getConfigPath() {
@@ -128,6 +133,16 @@ public class ModConfig {
         private void ensureDefaults() {
             if (entityWhitelist == null) {
                 entityWhitelist = new LinkedHashMap<>();
+            }
+        }
+    }
+
+    public static class ItemModelEnhanceConfig {
+        public Map<String, Float> itemScales = new LinkedHashMap<>();
+
+        private void ensureDefaults() {
+            if (itemScales == null) {
+                itemScales = new LinkedHashMap<>();
             }
         }
     }
