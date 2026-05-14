@@ -8,6 +8,7 @@
     "EntityAppearGlowingMixin",
     "EntityOutlineColorMixin",
     "GuiAntiAfkHudMixin",
+    "GuiScoreboardSidebarRenderMixin",
     "GuiStatusEffectTimerMixin",
     "HitboxEnhanceDebugRendererMixin",
     "ItemEntityRendererScaleMixin",
@@ -15,6 +16,7 @@
     "ItemEntityRenderStateScaleMixin",
     "IspEntityInvisibilityMixin",
     "LevelRendererChestOutlineMixin",
+    "PlayerTeamSidebarProtectionMixin",
     "ShulkerBoxOutlineMixin",
     "WindChargeOutlineMixin",
     "WitherSkullOutlineMixin"

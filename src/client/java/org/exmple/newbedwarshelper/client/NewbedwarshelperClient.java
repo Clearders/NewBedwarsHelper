@@ -4,6 +4,8 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import org.exmple.newbedwarshelper.client.antiafk.AntiAFKManager;
 import org.exmple.newbedwarshelper.client.esp.EspTargetStorage;
+import org.exmple.newbedwarshelper.client.enemystatusviewer.BedwarsGameDetector;
+import org.exmple.newbedwarshelper.client.enemystatusviewer.BedwarsProtectionTracker;
 import org.exmple.newbedwarshelper.client.gui.KeyMappingManager;
 import org.exmple.newbedwarshelper.client.hitboxenhance.HitboxEnhanceTargetStorage;
 import org.exmple.newbedwarshelper.client.isp.IspTargetStorage;
@@ -23,6 +25,8 @@ public class NewbedwarshelperClient implements ClientModInitializer {
         HitboxEnhanceTargetStorage.init();
         IspTargetStorage.init();
         ItemScaleRegistry.init();
+        BedwarsGameDetector.init();
+        BedwarsProtectionTracker.init();
         WebCommand.register();
         WeballCommand.register();
         ImeCommand.register();
