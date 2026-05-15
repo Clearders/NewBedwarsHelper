@@ -1,6 +1,7 @@
 package org.exmple.newbedwarshelper.client.enemystatusviewer;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
@@ -34,6 +35,45 @@ public final class BedwarsGameDetector {
 
     public static boolean isInGame() {
         return inDetectedGame;
+    }
+
+    public static Optional<BedwarsTeamMarker> getCurrentSelfTeamMarker(Minecraft client) {
+        if (client.level == null || client.player == null) {
+            BedwarsDebugLogger.detector("self marker unavailable: level or player is null");
+            return Optional.empty();
+        }
+
+        Scoreboard scoreboard = client.level.getScoreboard();
+        Objective sidebar = getVisibleSidebarObjective(client, scoreboard);
+        if (sidebar == null) {
+            BedwarsDebugLogger.detector("self marker unavailable: sidebar objective is null");
+            return Optional.empty();
+        }
+
+        for (PlayerScoreEntry score : scoreboard.listPlayerScores(sidebar)) {
+            if (score.isHidden()) {
+                continue;
+            }
+
+            PlayerTeam team = scoreboard.getPlayersTeam(score.owner());
+            if (team == null) {
+                continue;
+            }
+
+            Component displayedName = PlayerTeam.formatNameForTeam(team, score.ownerName());
+            if (!displayedName.getString().contains("YOU")) {
+                continue;
+            }
+
+            Optional<BedwarsTeamMarker> marker = BedwarsSidebarTeamParser.identify(team, displayedName);
+            BedwarsDebugLogger.detector("self marker row found: text='"
+                    + displayedName.getString()
+                    + "', marker=" + marker.map(BedwarsTeamMarker::debugName).orElse("none"));
+            return marker;
+        }
+
+        BedwarsDebugLogger.detector("self marker unavailable: no sidebar row contains YOU");
+        return Optional.empty();
     }
 
     private static void onClientTick(Minecraft client) {
@@ -166,5 +206,6 @@ public final class BedwarsGameDetector {
         ticksUntilNextCheck = 0;
         BedwarsDebugLogger.detector("ended detected game; clearing protection cache");
         BedwarsProtectionTracker.clear();
+        BedwarsInvisibilityToastNotifier.clear();
     }
 }

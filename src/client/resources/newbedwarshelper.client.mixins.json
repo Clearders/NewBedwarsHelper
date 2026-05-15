@@ -5,8 +5,10 @@
   "compatibilityLevel": "JAVA_25",
   "client": [
     "ChestOutlineMixin",
+    "ClientPacketListenerMobEffectMixin",
     "EntityAppearGlowingMixin",
     "EntityOutlineColorMixin",
+    "EntitySharedFlagAccessor",
     "GuiAntiAfkHudMixin",
     "GuiScoreboardSidebarRenderMixin",
     "GuiStatusEffectTimerMixin",

@@ -23,6 +23,10 @@ public final class BedwarsDebugLogger {
         log("tracker", message);
     }
 
+    public static void invisibility(String message) {
+        log("invisibility", message);
+    }
+
     public static void renderer(String message) {
         if (!ENABLED || !canLogRendererMessage()) {
             return;

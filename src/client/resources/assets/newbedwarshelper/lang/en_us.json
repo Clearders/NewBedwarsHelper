@@ -270,5 +270,7 @@
   "commands.newbedwarshelper.itemmodelenhance.scale_set": "Item model scale: %s was set to %s",
   "commands.newbedwarshelper.itemmodelenhance.scale_get": "Current scale for %s is %s",
   "commands.newbedwarshelper.itemmodelenhance.scale_reset": "Reset scale for %s",
-  "commands.newbedwarshelper.itemmodelenhance.scale_reset_all": "Reset all item scales"
+  "commands.newbedwarshelper.itemmodelenhance.scale_reset_all": "Reset all item scales",
+  "toast.newbedwarshelper.enemy_invis.title": "Enemy Invisibility Alert!",
+  "toast.newbedwarshelper.enemy_invis.message": "%s drank an Invisibility Potion. Stay alert!"
 }
