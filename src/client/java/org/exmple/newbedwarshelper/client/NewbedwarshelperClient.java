@@ -4,7 +4,6 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import org.exmple.newbedwarshelper.client.antiafk.AntiAFKManager;
 import org.exmple.newbedwarshelper.client.esp.EspTargetStorage;
-import org.exmple.newbedwarshelper.client.enemystatusviewer.BedwarsGameDetector;
 import org.exmple.newbedwarshelper.client.enemystatusviewer.BedwarsInvisibilityToastNotifier;
 import org.exmple.newbedwarshelper.client.enemystatusviewer.BedwarsProtectionTracker;
 import org.exmple.newbedwarshelper.client.gui.KeyMappingManager;
@@ -12,6 +11,7 @@ import org.exmple.newbedwarshelper.client.hitboxenhance.HitboxEnhanceTargetStora
 import org.exmple.newbedwarshelper.client.isp.IspTargetStorage;
 import org.exmple.newbedwarshelper.client.itemmodelenhance.ItemScaleRegistry;
 import org.exmple.newbedwarshelper.client.utils.AsyncExecutor;
+import org.exmple.newbedwarshelper.client.utils.bedwars.BedwarsGameDetector;
 import org.exmple.newbedwarshelper.client.z_commands.itemmodelenhance.ImeCommand;
 import org.exmple.newbedwarshelper.client.z_commands.statsfetcher.WebCommand;
 import org.exmple.newbedwarshelper.client.z_commands.statsfetcher.WeballCommand;

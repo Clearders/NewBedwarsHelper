@@ -1,4 +1,4 @@
-package org.exmple.newbedwarshelper.client.enemystatusviewer;
+package org.exmple.newbedwarshelper.client.utils.bedwars;
 
 import java.util.Optional;
 import java.util.Set;

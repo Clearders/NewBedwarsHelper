@@ -1,4 +1,4 @@
-package org.exmple.newbedwarshelper.client.enemystatusviewer;
+package org.exmple.newbedwarshelper.client.utils.bedwars;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -15,6 +15,9 @@ import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.PlayerScoreEntry;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
+import org.exmple.newbedwarshelper.client.enemystatusviewer.BedwarsDebugLogger;
+import org.exmple.newbedwarshelper.client.enemystatusviewer.BedwarsInvisibilityToastNotifier;
+import org.exmple.newbedwarshelper.client.enemystatusviewer.BedwarsProtectionTracker;
 
 public final class BedwarsGameDetector {
     private static final int CHECK_INTERVAL_TICKS = 20;

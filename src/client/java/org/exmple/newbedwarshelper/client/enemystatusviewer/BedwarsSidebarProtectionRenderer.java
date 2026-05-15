@@ -6,6 +6,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Team;
+import org.exmple.newbedwarshelper.client.utils.bedwars.BedwarsGameDetector;
+import org.exmple.newbedwarshelper.client.utils.bedwars.BedwarsSidebarTeamParser;
 
 public final class BedwarsSidebarProtectionRenderer {
     private static boolean renderingSidebar;

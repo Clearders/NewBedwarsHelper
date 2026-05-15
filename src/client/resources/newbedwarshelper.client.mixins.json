@@ -18,6 +18,7 @@
     "ItemEntityRenderStateScaleMixin",
     "IspEntityInvisibilityMixin",
     "LevelRendererChestOutlineMixin",
+    "LevelRendererFireballHelperMixin",
     "PlayerTeamSidebarProtectionMixin",
     "ShulkerBoxOutlineMixin",
     "WindChargeOutlineMixin",

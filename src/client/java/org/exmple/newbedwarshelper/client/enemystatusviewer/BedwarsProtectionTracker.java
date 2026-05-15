@@ -16,6 +16,8 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.scores.PlayerTeam;
+import org.exmple.newbedwarshelper.client.utils.bedwars.BedwarsGameDetector;
+import org.exmple.newbedwarshelper.client.utils.bedwars.BedwarsTeamMarker;
 
 public final class BedwarsProtectionTracker {
     private static final EquipmentSlot[] ARMOR_SLOTS = {
