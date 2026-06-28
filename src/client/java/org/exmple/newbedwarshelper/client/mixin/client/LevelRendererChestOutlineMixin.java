@@ -1,9 +1,9 @@
 package org.exmple.newbedwarshelper.client.mixin.client;
 
 import net.minecraft.client.Camera;
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.blockentity.state.ChestRenderState;
 import net.minecraft.client.renderer.blockentity.state.ShulkerBoxRenderState;
+import net.minecraft.client.renderer.extract.LevelExtractor;
 import net.minecraft.client.renderer.state.level.LevelRenderState;
 import org.exmple.newbedwarshelper.client.esp.EspBlockEntityTarget;
 import org.exmple.newbedwarshelper.client.esp.EspTargetStorage;
@@ -12,25 +12,25 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(LevelRenderer.class)
+@Mixin(LevelExtractor.class)
 public class LevelRendererChestOutlineMixin {
     @Inject(
             method = "extractVisibleBlockEntities",
             at = @At("RETURN")
     )
     private void enableOutlinePassForChests(Camera camera, float deltaPartialTick, LevelRenderState levelRenderState, CallbackInfo ci) {
-        if (levelRenderState.haveGlowingEntities) {
+        if (levelRenderState.shouldShowEntityOutlines) {
             return;
         }
 
         for (var state : levelRenderState.blockEntityRenderStates) {
             if (state instanceof ChestRenderState chestState && shouldGlowChest(chestState)) {
-                levelRenderState.haveGlowingEntities = true;
+                levelRenderState.shouldShowEntityOutlines = true;
                 return;
             }
 
             if (state instanceof ShulkerBoxRenderState && EspTargetStorage.shouldGlowBlockEntity(EspBlockEntityTarget.SHULKER_BOX)) {
-                levelRenderState.haveGlowingEntities = true;
+                levelRenderState.shouldShowEntityOutlines = true;
                 return;
             }
         }

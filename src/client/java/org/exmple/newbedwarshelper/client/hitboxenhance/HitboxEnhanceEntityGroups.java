@@ -2,6 +2,7 @@ package org.exmple.newbedwarshelper.client.hitboxenhance;
 
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.MobCategory;
 
 import java.util.ArrayList;
@@ -9,26 +10,26 @@ import java.util.List;
 
 public final class HitboxEnhanceEntityGroups {
     public static final List<EntityType<?>> BOAT_RAFT_TYPES = List.of(
-            EntityType.ACACIA_BOAT,
-            EntityType.ACACIA_CHEST_BOAT,
-            EntityType.BAMBOO_RAFT,
-            EntityType.BAMBOO_CHEST_RAFT,
-            EntityType.BIRCH_BOAT,
-            EntityType.BIRCH_CHEST_BOAT,
-            EntityType.CHERRY_BOAT,
-            EntityType.CHERRY_CHEST_BOAT,
-            EntityType.DARK_OAK_BOAT,
-            EntityType.DARK_OAK_CHEST_BOAT,
-            EntityType.JUNGLE_BOAT,
-            EntityType.JUNGLE_CHEST_BOAT,
-            EntityType.MANGROVE_BOAT,
-            EntityType.MANGROVE_CHEST_BOAT,
-            EntityType.OAK_BOAT,
-            EntityType.OAK_CHEST_BOAT,
-            EntityType.PALE_OAK_BOAT,
-            EntityType.PALE_OAK_CHEST_BOAT,
-            EntityType.SPRUCE_BOAT,
-            EntityType.SPRUCE_CHEST_BOAT
+            EntityTypes.ACACIA_BOAT,
+            EntityTypes.ACACIA_CHEST_BOAT,
+            EntityTypes.BAMBOO_RAFT,
+            EntityTypes.BAMBOO_CHEST_RAFT,
+            EntityTypes.BIRCH_BOAT,
+            EntityTypes.BIRCH_CHEST_BOAT,
+            EntityTypes.CHERRY_BOAT,
+            EntityTypes.CHERRY_CHEST_BOAT,
+            EntityTypes.DARK_OAK_BOAT,
+            EntityTypes.DARK_OAK_CHEST_BOAT,
+            EntityTypes.JUNGLE_BOAT,
+            EntityTypes.JUNGLE_CHEST_BOAT,
+            EntityTypes.MANGROVE_BOAT,
+            EntityTypes.MANGROVE_CHEST_BOAT,
+            EntityTypes.OAK_BOAT,
+            EntityTypes.OAK_CHEST_BOAT,
+            EntityTypes.PALE_OAK_BOAT,
+            EntityTypes.PALE_OAK_CHEST_BOAT,
+            EntityTypes.SPRUCE_BOAT,
+            EntityTypes.SPRUCE_CHEST_BOAT
     );
 
     public static final HitboxEnhanceEntityGroup MONSTER = group("monster", MobCategory.MONSTER);

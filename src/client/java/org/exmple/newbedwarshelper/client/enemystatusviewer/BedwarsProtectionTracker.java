@@ -8,13 +8,11 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.core.Holder;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.scores.PlayerTeam;
 import org.exmple.newbedwarshelper.client.utils.bedwars.BedwarsGameDetector;
 import org.exmple.newbedwarshelper.client.utils.bedwars.BedwarsTeamMarker;
@@ -28,26 +26,32 @@ public final class BedwarsProtectionTracker {
     };
     private static final int CHECK_INTERVAL_TICKS = 20;
 
-    private static final Map<BedwarsTeamMarker, Integer> teamProtectionLevels = new HashMap<>();
+    private static final Map<BedwarsTeamMarker, ArmorUpgradeStatus> teamArmorStatuses = new HashMap<>();
     private static int ticksUntilNextCheck;
 
     private BedwarsProtectionTracker() {
     }
 
     public static void init() {
-        BedwarsDebugLogger.tracker("init registered");
         ClientTickEvents.END_CLIENT_TICK.register(BedwarsProtectionTracker::onClientTick);
     }
 
     public static OptionalInt getProtectionLevel(BedwarsTeamMarker marker) {
-        Integer level = teamProtectionLevels.get(marker);
-        return level == null ? OptionalInt.empty() : OptionalInt.of(level);
+        ArmorUpgradeStatus status = teamArmorStatuses.get(marker);
+        if (status == null || status.protectionLevel() <= 0) {
+            return OptionalInt.empty();
+        }
+
+        return OptionalInt.of(status.protectionLevel());
+    }
+
+    public static Optional<ArmorUpgradeStatus> getArmorStatus(BedwarsTeamMarker marker) {
+        return Optional.ofNullable(teamArmorStatuses.get(marker));
     }
 
     public static void clear() {
-        teamProtectionLevels.clear();
+        teamArmorStatuses.clear();
         ticksUntilNextCheck = 0;
-        BedwarsDebugLogger.tracker("cache cleared");
     }
 
     private static void onClientTick(Minecraft client) {
@@ -58,31 +62,30 @@ public final class BedwarsProtectionTracker {
         ticksUntilNextCheck = CHECK_INTERVAL_TICKS;
 
         if (!BedwarsGameDetector.isInGame()) {
-            BedwarsDebugLogger.tracker("skip tick: detector says not in game");
             return;
         }
 
         if (client.level == null) {
-            BedwarsDebugLogger.tracker("skip tick: level is null");
+            return;
+        }
+
+        Optional<BedwarsTeamMarker> selfMarker = BedwarsGameDetector.getCurrentSelfTeamMarker(client);
+        if (selfMarker.isEmpty()) {
             return;
         }
 
         Holder<Enchantment> protection = client.level.registryAccess().getOrThrow(Enchantments.PROTECTION);
-        BedwarsDebugLogger.tracker("scan players count=" + client.level.players().size() + ", cache=" + describeCache());
+        Holder<Enchantment> featherFalling = client.level.registryAccess().getOrThrow(Enchantments.FEATHER_FALLING);
         for (AbstractClientPlayer player : client.level.players()) {
             Optional<BedwarsTeamMarker> marker = getPlayerTeamMarker(player);
             if (marker.isEmpty()) {
-                BedwarsDebugLogger.tracker("player=" + player.getScoreboardName() + ", no BedWars marker, team="
-                        + (player.getTeam() == null ? "null" : player.getTeam().getName()));
                 continue;
             }
 
-            int level = getMaxProtectionLevel(player, protection);
-            BedwarsDebugLogger.tracker("player=" + player.getScoreboardName()
-                    + ", marker=" + marker.get().debugName()
-                    + ", maxProtection=" + level
-                    + ", armor=" + describeArmor(player, protection));
-            updateTeamProtection(marker.get(), level);
+            ArmorUpgradeStatus status = marker.get().equals(selfMarker.get())
+                    ? getSelfTeamArmorStatus(player, protection, featherFalling)
+                    : getEnemyTeamArmorStatus(player);
+            updateTeamArmorStatus(marker.get(), status);
         }
     }
 
@@ -92,6 +95,22 @@ public final class BedwarsProtectionTracker {
         }
 
         return BedwarsTeamMarker.fromColor(team.getColor());
+    }
+
+    private static ArmorUpgradeStatus getSelfTeamArmorStatus(
+            AbstractClientPlayer player,
+            Holder<Enchantment> protection,
+            Holder<Enchantment> featherFalling
+    ) {
+        return new ArmorUpgradeStatus(
+                getMaxProtectionLevel(player, protection),
+                false,
+                getFeatherFallingLevel(player, featherFalling)
+        );
+    }
+
+    private static ArmorUpgradeStatus getEnemyTeamArmorStatus(AbstractClientPlayer player) {
+        return new ArmorUpgradeStatus(0, hasFullArmorGlint(player), 0);
     }
 
     private static int getMaxProtectionLevel(AbstractClientPlayer player, Holder<Enchantment> protection) {
@@ -104,77 +123,41 @@ public final class BedwarsProtectionTracker {
         return maxLevel;
     }
 
-    private static void updateTeamProtection(BedwarsTeamMarker marker, int level) {
-        if (level <= 0) {
-            BedwarsDebugLogger.tracker("ignore marker=" + marker.debugName() + ", level=" + level);
+    private static int getFeatherFallingLevel(AbstractClientPlayer player, Holder<Enchantment> featherFalling) {
+        ItemStack boots = player.getItemBySlot(EquipmentSlot.FEET);
+        return Math.min(2, EnchantmentHelper.getItemEnchantmentLevel(featherFalling, boots));
+    }
+
+    private static boolean hasFullArmorGlint(AbstractClientPlayer player) {
+        for (EquipmentSlot slot : ARMOR_SLOTS) {
+            ItemStack stack = player.getItemBySlot(slot);
+            if (stack.isEmpty() || !stack.hasFoil()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static void updateTeamArmorStatus(BedwarsTeamMarker marker, ArmorUpgradeStatus observedStatus) {
+        if (observedStatus.isEmpty()) {
             return;
         }
 
-        Integer oldLevel = teamProtectionLevels.get(marker);
-        teamProtectionLevels.merge(marker, level, Math::max);
-        Integer newLevel = teamProtectionLevels.get(marker);
-        BedwarsDebugLogger.tracker("update marker=" + marker.debugName()
-                + ", old=" + (oldLevel == null ? "none" : oldLevel)
-                + ", observed=" + level
-                + ", new=" + newLevel);
+        teamArmorStatuses.merge(marker, observedStatus, ArmorUpgradeStatus::merge);
     }
 
-    private static String describeArmor(AbstractClientPlayer player, Holder<Enchantment> protection) {
-        StringBuilder builder = new StringBuilder();
-        for (EquipmentSlot slot : ARMOR_SLOTS) {
-            if (!builder.isEmpty()) {
-                builder.append(", ");
-            }
-
-            ItemStack stack = player.getItemBySlot(slot);
-            builder.append(slot.getName())
-                    .append("=")
-                    .append(describeArmorStack(stack, protection));
+    public record ArmorUpgradeStatus(int protectionLevel, boolean enemyFullArmorGlint, int featherFallingLevel) {
+        private boolean isEmpty() {
+            return protectionLevel <= 0 && !enemyFullArmorGlint && featherFallingLevel <= 0;
         }
 
-        return builder.toString();
-    }
-
-    private static String describeArmorStack(ItemStack stack, Holder<Enchantment> protection) {
-        if (stack.isEmpty()) {
-            return "empty";
+        private ArmorUpgradeStatus merge(ArmorUpgradeStatus other) {
+            return new ArmorUpgradeStatus(
+                    Math.max(protectionLevel, other.protectionLevel),
+                    enemyFullArmorGlint || other.enemyFullArmorGlint,
+                    Math.max(featherFallingLevel, other.featherFallingLevel)
+            );
         }
-
-        ItemEnchantments enchantments = stack.getEnchantments();
-        Boolean glintOverride = stack.get(DataComponents.ENCHANTMENT_GLINT_OVERRIDE);
-        return stack.getHoverName().getString()
-                + "{prot=" + EnchantmentHelper.getItemEnchantmentLevel(protection, stack)
-                + ", enchanted=" + stack.isEnchanted()
-                + ", foil=" + stack.hasFoil()
-                + ", glintOverride=" + (glintOverride == null ? "none" : glintOverride)
-                + ", enchantCount=" + enchantments.size()
-                + ", enchants=" + describeEnchantments(enchantments)
-                + "}";
-    }
-
-    private static String describeEnchantments(ItemEnchantments enchantments) {
-        if (enchantments.isEmpty()) {
-            return "[]";
-        }
-
-        return enchantments.entrySet()
-                .stream()
-                .map(entry -> entry.getKey().getRegisteredName() + ":" + entry.getIntValue())
-                .sorted()
-                .toList()
-                .toString();
-    }
-
-    private static String describeCache() {
-        if (teamProtectionLevels.isEmpty()) {
-            return "{}";
-        }
-
-        return teamProtectionLevels.entrySet()
-                .stream()
-                .map(entry -> entry.getKey().debugName() + "=" + entry.getValue())
-                .sorted()
-                .toList()
-                .toString();
     }
 }

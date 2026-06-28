@@ -4,6 +4,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import org.exmple.newbedwarshelper.client.z_config.ModConfig;
 
 import java.util.Collections;
@@ -148,7 +149,7 @@ public final class IspTargetStorage {
     private static Map<EntityType<?>, Boolean> createDefaultWhitelist() {
         Map<EntityType<?>, Boolean> whitelist = new LinkedHashMap<>();
         for (EntityType<?> entityType : IspEntityGroups.allEntityTypes()) {
-            whitelist.put(entityType, entityType == EntityType.PLAYER);
+            whitelist.put(entityType, entityType == EntityTypes.PLAYER);
         }
         return whitelist;
     }

@@ -5,8 +5,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.Hud;
 import net.minecraft.core.Holder;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -21,7 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.Collection;
 
 @Environment(EnvType.CLIENT)
-@Mixin(Gui.class)
+@Mixin(Hud.class)
 public abstract class GuiStatusEffectTimerMixin {
 
     @Shadow
@@ -30,7 +30,7 @@ public abstract class GuiStatusEffectTimerMixin {
 
     @Inject(method = "extractEffects", at = @At("RETURN"))
     private void newbedwarshelper$appendStatusEffectTimers(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
-        if (minecraft.player == null || minecraft.screen != null && minecraft.screen.showsActiveEffects()) {
+        if (minecraft.player == null || minecraft.gui.screen() != null && minecraft.gui.screen().showsActiveEffects()) {
             return;
         }
 

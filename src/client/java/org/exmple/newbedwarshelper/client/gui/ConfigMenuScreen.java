@@ -30,19 +30,19 @@ public class ConfigMenuScreen extends Screen {
         GridLayout gridLayout = new GridLayout();
         gridLayout.defaultCellSetting().padding(4, 4, 4, 0);
         GridLayout.RowHelper helper = gridLayout.createRowHelper(2);
-        helper.addChild(Button.builder(ESP_CONFIG_TEXT, button -> this.minecraft.setScreen(new EspWhitelistScreen(this.minecraft, this)))
+        helper.addChild(Button.builder(ESP_CONFIG_TEXT, button -> this.minecraft.gui.setScreen(new EspWhitelistScreen(this.minecraft, this)))
                 .width(BUTTON_WIDTH)
                 .build(), gridLayout.newCellSettings().paddingTop(50));
-        helper.addChild(Button.builder(ANTI_AFK_CONFIG_TEXT, button -> this.minecraft.setScreen(new AntiAfkConfigScreen(this.minecraft, this)))
+        helper.addChild(Button.builder(ANTI_AFK_CONFIG_TEXT, button -> this.minecraft.gui.setScreen(new AntiAfkConfigScreen(this.minecraft, this)))
                 .width(BUTTON_WIDTH)
                 .build(), gridLayout.newCellSettings().paddingTop(50));
-        helper.addChild(Button.builder(STATS_FETCHER_CONFIG_TEXT, button -> this.minecraft.setScreen(new StatsFetcherConfigScreen(this.minecraft, this)))
+        helper.addChild(Button.builder(STATS_FETCHER_CONFIG_TEXT, button -> this.minecraft.gui.setScreen(new StatsFetcherConfigScreen(this.minecraft, this)))
                 .width(BUTTON_WIDTH)
                 .build(), gridLayout.newCellSettings().paddingTop(5));
-        helper.addChild(Button.builder(HITBOX_ENHANCE_CONFIG_TEXT, button -> this.minecraft.setScreen(new HitboxEnhanceConfigScreen(this.minecraft, this)))
+        helper.addChild(Button.builder(HITBOX_ENHANCE_CONFIG_TEXT, button -> this.minecraft.gui.setScreen(new HitboxEnhanceConfigScreen(this.minecraft, this)))
                 .width(BUTTON_WIDTH)
                 .build(), gridLayout.newCellSettings().paddingTop(5));
-        helper.addChild(Button.builder(ISP_CONFIG_TEXT, button -> this.minecraft.setScreen(new IspConfigScreen(this.minecraft, this)))
+        helper.addChild(Button.builder(ISP_CONFIG_TEXT, button -> this.minecraft.gui.setScreen(new IspConfigScreen(this.minecraft, this)))
                 .width(BUTTON_WIDTH)
                 .build(), gridLayout.newCellSettings().paddingTop(5));
         helper.addChild(Button.builder(DONE_TEXT, button -> this.onClose())
@@ -58,7 +58,7 @@ public class ConfigMenuScreen extends Screen {
 
     @Override
     public void onClose() {
-        this.minecraft.setScreen(this.parent);
+        this.minecraft.gui.setScreen(this.parent);
     }
 
 }

@@ -13,6 +13,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import org.exmple.newbedwarshelper.client.esp.EspBlockEntityGroup;
 import org.exmple.newbedwarshelper.client.esp.EspBlockEntityGroups;
 import org.exmple.newbedwarshelper.client.esp.EspBlockEntityTarget;
@@ -105,7 +106,7 @@ public class EspWhitelistScreen extends Screen {
 
     @Override
     public void onClose() {
-        this.minecraft.setScreen(this.parent);
+        this.minecraft.gui.setScreen(this.parent);
     }
 
     @Override
@@ -276,7 +277,7 @@ public class EspWhitelistScreen extends Screen {
             this.addRenderableWidget(row.enableButton);
             this.addRenderableWidget(row.disableButton);
 
-            if (group == EspEntityGroups.MISC && entityType == EntityType.WITHER_SKULL) {
+            if (group == EspEntityGroups.MISC && entityType == EntityTypes.WITHER_SKULL) {
                 Component dangerousLabel = Component.translatable("entity.newbedwarshelper.wither_skull_dangerous");
                 Row dangerousRow = Row.dangerousWitherSkull(dangerousLabel);
                 this.allRows.add(dangerousRow);

@@ -65,7 +65,7 @@ public class StatsFetcherConfigScreen extends Screen {
 
     @Override
     public void onClose() {
-        this.minecraft.setScreen(this.parent);
+        this.minecraft.gui.setScreen(this.parent);
     }
 
     private static CycleButton<Boolean> createToggleButton(Function<Boolean, Component> valueText, boolean initialValue, Consumer<Boolean> onChange) {

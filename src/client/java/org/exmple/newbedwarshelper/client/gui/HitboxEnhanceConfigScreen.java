@@ -13,6 +13,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import org.exmple.newbedwarshelper.client.hitboxenhance.HitboxEnhanceEntityGroup;
 import org.exmple.newbedwarshelper.client.hitboxenhance.HitboxEnhanceEntityGroups;
 import org.exmple.newbedwarshelper.client.hitboxenhance.HitboxEnhanceTargetStorage;
@@ -105,7 +106,7 @@ public class HitboxEnhanceConfigScreen extends Screen {
 
     @Override
     public void onClose() {
-        this.minecraft.setScreen(this.parent);
+        this.minecraft.gui.setScreen(this.parent);
     }
 
     @Override
@@ -272,7 +273,7 @@ public class HitboxEnhanceConfigScreen extends Screen {
             this.addRenderableWidget(row.enableButton);
             this.addRenderableWidget(row.disableButton);
 
-            if (group == HitboxEnhanceEntityGroups.MISC && entityType == EntityType.WITHER_SKULL) {
+            if (group == HitboxEnhanceEntityGroups.MISC && entityType == EntityTypes.WITHER_SKULL) {
                 Component dangerousLabel = Component.translatable("entity.newbedwarshelper.wither_skull_dangerous");
                 Row dangerousRow = Row.dangerousWitherSkull(dangerousLabel);
                 this.allRows.add(dangerousRow);

@@ -104,7 +104,7 @@ public final class AntiAFKManager {
         if (mc.options == null) {
             return;
         }
-        if (mc.screen != null) {
+        if (mc.gui.screen() != null) {
             forceStopAll(mc);
             return;
         }

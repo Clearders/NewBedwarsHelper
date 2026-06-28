@@ -44,49 +44,34 @@ public final class BedwarsInvisibilityToastNotifier {
             return;
         }
 
-        BedwarsDebugLogger.invisibility("received invisibility update packet; entityId="
-                + packet.getEntityId() + ", durationTicks=" + packet.getEffectDurationTicks());
         if (!BedwarsGameDetector.isInGame()) {
-            BedwarsDebugLogger.invisibility("skip update: detector says not in game");
             return;
         }
 
         Minecraft client = Minecraft.getInstance();
         if (client.level == null || client.player == null) {
-            BedwarsDebugLogger.invisibility("skip update: level or player is null");
             return;
         }
 
         Entity entity = client.level.getEntity(packet.getEntityId());
         if (!(entity instanceof AbstractClientPlayer player) || player == client.player) {
-            BedwarsDebugLogger.invisibility("skip update: entity is not another client player; entity="
-                    + describeEntity(entity)
-                    + ", isSelf=" + (entity == client.player));
             return;
         }
 
         if (packet.getEffectDurationTicks() < 0) {
             ignoredNegativeDurationPlayers.add(player.getUUID());
             invisiblePlayers.remove(player.getUUID());
-            BedwarsDebugLogger.invisibility("skip update: negative duration invisibility; player="
-                    + player.getGameProfile().name()
-                    + ", uuid=" + player.getUUID()
-                    + ", durationTicks=" + packet.getEffectDurationTicks());
             return;
         }
         ignoredNegativeDurationPlayers.remove(player.getUUID());
 
         if (!isListed(player)) {
-            BedwarsDebugLogger.invisibility("skip update: player is not listed; player="
-                    + player.getGameProfile().name()
-                    + ", uuid=" + player.getUUID());
             invisiblePlayers.remove(player.getUUID());
             return;
         }
 
         Optional<BedwarsTeamMarker> selfMarker = BedwarsGameDetector.getCurrentSelfTeamMarker(client);
         if (selfMarker.isEmpty()) {
-            BedwarsDebugLogger.invisibility("skip update: self BedWars marker is unavailable");
             return;
         }
 
@@ -97,15 +82,8 @@ public final class BedwarsInvisibilityToastNotifier {
 
         boolean hasInvisibilityEffect = player.hasEffect(MobEffects.INVISIBILITY);
         boolean rawSharedInvisible = isRawSharedInvisible(player);
-        BedwarsDebugLogger.invisibility("update state: player="
-                + player.getGameProfile().name()
-                + ", marker=" + target.marker.debugName()
-                + ", durationTicks=" + packet.getEffectDurationTicks()
-                + ", hasInvisibilityEffect=" + hasInvisibilityEffect
-                + ", rawSharedInvisible=" + rawSharedInvisible
-                + ", isInvisibleAfterMixins=" + player.isInvisible());
         if (hasInvisibilityEffect || rawSharedInvisible) {
-            showToastOnce(client, player, target.marker, "packet");
+            showToastOnce(client, player, target.marker);
         }
     }
 
@@ -114,22 +92,15 @@ public final class BedwarsInvisibilityToastNotifier {
             return;
         }
 
-        BedwarsDebugLogger.invisibility("received invisibility remove packet");
         Minecraft client = Minecraft.getInstance();
         if (client.level == null) {
-            BedwarsDebugLogger.invisibility("skip remove: level is null");
             return;
         }
 
         Entity entity = packet.getEntity(client.level);
         if (entity != null) {
-            boolean removed = invisiblePlayers.remove(entity.getUUID());
+            invisiblePlayers.remove(entity.getUUID());
             ignoredNegativeDurationPlayers.remove(entity.getUUID());
-            BedwarsDebugLogger.invisibility("remove invisible marker: entity="
-                    + describeEntity(entity)
-                    + ", removed=" + removed);
-        } else {
-            BedwarsDebugLogger.invisibility("skip remove: packet entity not found in level");
         }
     }
 
@@ -147,26 +118,17 @@ public final class BedwarsInvisibilityToastNotifier {
         ticksUntilNextScan = SCAN_INTERVAL_TICKS;
 
         if (!BedwarsGameDetector.isInGame()) {
-            if (!invisiblePlayers.isEmpty()) {
-                BedwarsDebugLogger.invisibility("clear scan cache: detector says not in game");
-            }
             invisiblePlayers.clear();
             return;
         }
 
         if (client.level == null || client.player == null) {
-            if (!invisiblePlayers.isEmpty()) {
-                BedwarsDebugLogger.invisibility("clear scan cache: level or player is null");
-            }
             invisiblePlayers.clear();
             return;
         }
 
         Optional<BedwarsTeamMarker> selfMarker = BedwarsGameDetector.getCurrentSelfTeamMarker(client);
         if (selfMarker.isEmpty()) {
-            if (!invisiblePlayers.isEmpty()) {
-                BedwarsDebugLogger.invisibility("clear scan cache: self BedWars marker is unavailable");
-            }
             invisiblePlayers.clear();
             return;
         }
@@ -185,9 +147,6 @@ public final class BedwarsInvisibilityToastNotifier {
 
             if (ignoredNegativeDurationPlayers.contains(player.getUUID())) {
                 invisiblePlayers.remove(player.getUUID());
-                BedwarsDebugLogger.invisibility("skip scan: negative duration invisibility is ignored; player="
-                        + player.getGameProfile().name()
-                        + ", uuid=" + player.getUUID());
                 continue;
             }
 
@@ -200,21 +159,13 @@ public final class BedwarsInvisibilityToastNotifier {
             boolean hasInvisibilityEffect = player.hasEffect(MobEffects.INVISIBILITY);
             boolean rawSharedInvisible = isRawSharedInvisible(player);
             boolean invisible = hasInvisibilityEffect || rawSharedInvisible;
-            BedwarsDebugLogger.invisibility("scan player: name="
-                    + player.getGameProfile().name()
-                    + ", uuid=" + player.getUUID()
-                    + ", id=" + player.getId()
-                    + ", marker=" + target.marker.debugName()
-                    + ", hasInvisibilityEffect=" + hasInvisibilityEffect
-                    + ", rawSharedInvisible=" + rawSharedInvisible
-                    + ", isInvisibleAfterMixins=" + player.isInvisible());
             if (!invisible) {
                 invisiblePlayers.remove(player.getUUID());
                 continue;
             }
 
             currentlyInvisible.add(player.getUUID());
-            showToastOnce(client, player, target.marker, "scan");
+            showToastOnce(client, player, target.marker);
         }
 
         invisiblePlayers.retainAll(currentlyInvisible);
@@ -222,50 +173,26 @@ public final class BedwarsInvisibilityToastNotifier {
 
     private static PlayerInvisibilityTarget getEnemyTarget(Minecraft client, AbstractClientPlayer player, BedwarsTeamMarker selfMarker) {
         if (!(player.getTeam() instanceof PlayerTeam playerTeam)) {
-            BedwarsDebugLogger.invisibility("skip player: no valid scoreboard team; player="
-                    + player.getGameProfile().name()
-                    + ", playerTeam=" + describeTeam(player.getTeam())
-                    + ", selfTeam=" + describeTeam(client.player.getTeam()));
             return null;
         }
 
         BedwarsTeamMarker marker = BedwarsTeamMarker.fromColor(playerTeam.getColor()).orElse(null);
         if (marker == null) {
-            BedwarsDebugLogger.invisibility("skip player: team color is not a BedWars marker; player="
-                    + player.getGameProfile().name()
-                    + ", team=" + describeTeam(playerTeam));
             return null;
         }
 
         if (marker.equals(selfMarker)) {
-            BedwarsDebugLogger.invisibility("skip player: same BedWars marker; player="
-                    + player.getGameProfile().name()
-                    + ", marker=" + marker.debugName()
-                    + ", selfMarker=" + selfMarker.debugName()
-                    + ", playerTeam=" + describeTeam(playerTeam)
-                    + ", selfTeam=" + describeTeam(client.player.getTeam()));
             return null;
         }
 
-        BedwarsDebugLogger.invisibility("enemy target accepted: player="
-                + player.getGameProfile().name()
-                + ", marker=" + marker.debugName()
-                + ", selfMarker=" + selfMarker.debugName()
-                + ", playerTeam=" + describeTeam(playerTeam)
-                + ", selfTeam=" + describeTeam(client.player.getTeam()));
         return new PlayerInvisibilityTarget(marker);
     }
 
-    private static void showToastOnce(Minecraft client, AbstractClientPlayer player, BedwarsTeamMarker marker, String source) {
+    private static void showToastOnce(Minecraft client, AbstractClientPlayer player, BedwarsTeamMarker marker) {
         if (!invisiblePlayers.add(player.getUUID())) {
             return;
         }
 
-        BedwarsDebugLogger.invisibility("show toast from " + source + ": player="
-                + player.getGameProfile().name()
-                + ", uuid=" + player.getUUID()
-                + ", id=" + player.getId()
-                + ", marker=" + marker.debugName());
         showToast(client, player, marker);
     }
 
@@ -298,24 +225,5 @@ public final class BedwarsInvisibilityToastNotifier {
     }
 
     private record PlayerInvisibilityTarget(BedwarsTeamMarker marker) {
-    }
-
-    private static String describeEntity(Entity entity) {
-        if (entity == null) {
-            return "null";
-        }
-
-        return entity.getClass().getSimpleName()
-                + "{name=" + entity.getName().getString()
-                + ", uuid=" + entity.getUUID()
-                + ", id=" + entity.getId() + "}";
-    }
-
-    private static String describeTeam(net.minecraft.world.scores.Team team) {
-        if (team == null) {
-            return "null";
-        }
-
-        return "{name=" + team.getName() + ", color=" + team.getColor().getName() + "}";
     }
 }

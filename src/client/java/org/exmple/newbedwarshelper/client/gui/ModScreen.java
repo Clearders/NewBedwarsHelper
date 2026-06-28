@@ -39,7 +39,7 @@ public class ModScreen extends Screen {
         GridLayout gridLayout = new GridLayout();
         gridLayout.defaultCellSetting().padding(4, 4, 4, 0);
         GridLayout.RowHelper helper = gridLayout.createRowHelper(2);
-        helper.addChild(Button.builder(OPEN_CONFIG_TEXT, button -> this.minecraft.setScreen(new ConfigMenuScreen(this.minecraft, this)))
+        helper.addChild(Button.builder(OPEN_CONFIG_TEXT, button -> this.minecraft.gui.setScreen(new ConfigMenuScreen(this.minecraft, this)))
                 .width(BUTTON_WIDTH_FULL)
                 .build(), 2, gridLayout.newCellSettings().paddingTop(50));
         helper.addChild(openLinkButton(SOURCE_TEXT, SOURCE_URL));
@@ -59,7 +59,7 @@ public class ModScreen extends Screen {
 
     @Override
     public void onClose() {
-        this.minecraft.setScreen(this.parent);
+        this.minecraft.gui.setScreen(this.parent);
     }
 
     private Button openLinkButton(Component message, URI link) {

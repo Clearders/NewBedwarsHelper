@@ -2,6 +2,7 @@ package org.exmple.newbedwarshelper.client.isp;
 
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.MobCategory;
 
 import java.util.ArrayList;
@@ -18,10 +19,10 @@ public final class IspEntityGroups {
     public static final IspEntityGroup MISC = new IspEntityGroup(
             "screen.newbedwarshelper.isp_whitelist.group.misc",
             List.of(
-                    EntityType.PLAYER,
-                    EntityType.IRON_GOLEM,
-                    EntityType.SNOW_GOLEM,
-                    EntityType.MANNEQUIN
+                    EntityTypes.PLAYER,
+                    EntityTypes.IRON_GOLEM,
+                    EntityTypes.SNOW_GOLEM,
+                    EntityTypes.MANNEQUIN
             )
     );
 

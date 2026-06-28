@@ -3,6 +3,10 @@ package org.exmple.newbedwarshelper.client.enemystatusviewer;
 import com.mojang.logging.LogUtils;
 import org.slf4j.Logger;
 
+/**
+ * Legacy BedWars debug logger. Runtime callers were removed after detector debugging was completed.
+ */
+@Deprecated(forRemoval = false)
 public final class BedwarsDebugLogger {
     public static final boolean ENABLED = true;
     private static final Logger LOGGER = LogUtils.getLogger();

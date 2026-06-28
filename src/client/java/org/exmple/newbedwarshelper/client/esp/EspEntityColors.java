@@ -2,6 +2,7 @@ package org.exmple.newbedwarshelper.client.esp;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.hurtingprojectile.WitherSkull;
 
@@ -29,11 +30,15 @@ public final class EspEntityColors {
     }
 
     public static int getOutlineColorOrDefault(Entity entity, int defaultColor) {
-        if (entity instanceof Player || entity.getType() == EntityType.MANNEQUIN || !EspTargetStorage.shouldGlow(entity)) {
+        if (entity instanceof Player || entity.getType() == EntityTypes.MANNEQUIN || !EspTargetStorage.shouldGlow(entity)) {
             return defaultColor;
         }
 
         EntityType<?> entityType = entity.getType();
+        if (entityType == EntityTypes.SULFUR_CUBE) {
+            return GREEN;
+        }
+
         if (EspEntityGroups.MONSTER.entityTypes().contains(entityType)) {
             return RED;
         }
@@ -42,11 +47,11 @@ public final class EspEntityColors {
             return GREEN;
         }
 
-        if (entityType == EntityType.GLOW_SQUID) {
+        if (entityType == EntityTypes.GLOW_SQUID) {
             return CYAN;
         }
 
-        if (entityType == EntityType.DOLPHIN || entityType == EntityType.NAUTILUS) {
+        if (entityType == EntityTypes.DOLPHIN || entityType == EntityTypes.NAUTILUS) {
             return YELLOW;
         }
 
@@ -54,55 +59,55 @@ public final class EspEntityColors {
             return LIGHT_WOOD;
         }
 
-        if (entityType == EntityType.CHEST_MINECART) {
+        if (entityType == EntityTypes.CHEST_MINECART) {
             return BROWN;
         }
 
-        if (entityType == EntityType.HOPPER_MINECART) {
+        if (entityType == EntityTypes.HOPPER_MINECART) {
             return DARK_HOPPER;
         }
 
-        if (entityType == EntityType.TNT || entityType == EntityType.TNT_MINECART) {
+        if (entityType == EntityTypes.TNT || entityType == EntityTypes.TNT_MINECART) {
             return 0xFFFF0000;
         }
 
-        if (entityType == EntityType.COMMAND_BLOCK_MINECART) {
+        if (entityType == EntityTypes.COMMAND_BLOCK_MINECART) {
             return COMMAND_BLOCK_FLESH;
         }
 
-        if (entityType == EntityType.SPAWNER_MINECART || entityType == EntityType.END_CRYSTAL) {
+        if (entityType == EntityTypes.SPAWNER_MINECART || entityType == EntityTypes.END_CRYSTAL) {
             return PURPLE;
         }
 
-        if (entityType == EntityType.ENDER_PEARL) {
+        if (entityType == EntityTypes.ENDER_PEARL) {
             return DEEP_PEARL_GREEN;
         }
 
-        if (entityType == EntityType.EYE_OF_ENDER || entityType == EntityType.SMALL_FIREBALL) {
+        if (entityType == EntityTypes.EYE_OF_ENDER || entityType == EntityTypes.SMALL_FIREBALL) {
             return YELLOW;
         }
 
-        if (entityType == EntityType.FIREBALL) {
+        if (entityType == EntityTypes.FIREBALL) {
             return ORANGE;
         }
 
-        if (entityType == EntityType.SPLASH_POTION || entityType == EntityType.LINGERING_POTION || entityType == EntityType.EXPERIENCE_BOTTLE) {
+        if (entityType == EntityTypes.SPLASH_POTION || entityType == EntityTypes.LINGERING_POTION || entityType == EntityTypes.EXPERIENCE_BOTTLE) {
             return GOLD;
         }
 
-        if (entityType == EntityType.TRIDENT) {
+        if (entityType == EntityTypes.TRIDENT) {
             return BLUE;
         }
 
-        if (entityType == EntityType.FIREWORK_ROCKET) {
+        if (entityType == EntityTypes.FIREWORK_ROCKET) {
             return MAGENTA;
         }
 
-        if (entityType == EntityType.WIND_CHARGE || entityType == EntityType.BREEZE_WIND_CHARGE) {
+        if (entityType == EntityTypes.WIND_CHARGE || entityType == EntityTypes.BREEZE_WIND_CHARGE) {
             return LIGHT_SKY_CYAN;
         }
 
-        if (entityType == EntityType.OMINOUS_ITEM_SPAWNER) {
+        if (entityType == EntityTypes.OMINOUS_ITEM_SPAWNER) {
             return OMINOUS_CYAN;
         }
 
@@ -114,25 +119,25 @@ public final class EspEntityColors {
     }
 
     private static boolean isBoat(EntityType<?> entityType) {
-        return entityType == EntityType.ACACIA_BOAT
-                || entityType == EntityType.ACACIA_CHEST_BOAT
-                || entityType == EntityType.BAMBOO_RAFT
-                || entityType == EntityType.BAMBOO_CHEST_RAFT
-                || entityType == EntityType.BIRCH_BOAT
-                || entityType == EntityType.BIRCH_CHEST_BOAT
-                || entityType == EntityType.CHERRY_BOAT
-                || entityType == EntityType.CHERRY_CHEST_BOAT
-                || entityType == EntityType.DARK_OAK_BOAT
-                || entityType == EntityType.DARK_OAK_CHEST_BOAT
-                || entityType == EntityType.JUNGLE_BOAT
-                || entityType == EntityType.JUNGLE_CHEST_BOAT
-                || entityType == EntityType.MANGROVE_BOAT
-                || entityType == EntityType.MANGROVE_CHEST_BOAT
-                || entityType == EntityType.OAK_BOAT
-                || entityType == EntityType.OAK_CHEST_BOAT
-                || entityType == EntityType.PALE_OAK_BOAT
-                || entityType == EntityType.PALE_OAK_CHEST_BOAT
-                || entityType == EntityType.SPRUCE_BOAT
-                || entityType == EntityType.SPRUCE_CHEST_BOAT;
+        return entityType == EntityTypes.ACACIA_BOAT
+                || entityType == EntityTypes.ACACIA_CHEST_BOAT
+                || entityType == EntityTypes.BAMBOO_RAFT
+                || entityType == EntityTypes.BAMBOO_CHEST_RAFT
+                || entityType == EntityTypes.BIRCH_BOAT
+                || entityType == EntityTypes.BIRCH_CHEST_BOAT
+                || entityType == EntityTypes.CHERRY_BOAT
+                || entityType == EntityTypes.CHERRY_CHEST_BOAT
+                || entityType == EntityTypes.DARK_OAK_BOAT
+                || entityType == EntityTypes.DARK_OAK_CHEST_BOAT
+                || entityType == EntityTypes.JUNGLE_BOAT
+                || entityType == EntityTypes.JUNGLE_CHEST_BOAT
+                || entityType == EntityTypes.MANGROVE_BOAT
+                || entityType == EntityTypes.MANGROVE_CHEST_BOAT
+                || entityType == EntityTypes.OAK_BOAT
+                || entityType == EntityTypes.OAK_CHEST_BOAT
+                || entityType == EntityTypes.PALE_OAK_BOAT
+                || entityType == EntityTypes.PALE_OAK_CHEST_BOAT
+                || entityType == EntityTypes.SPRUCE_BOAT
+                || entityType == EntityTypes.SPRUCE_CHEST_BOAT;
     }
 }

@@ -3,6 +3,7 @@ package org.exmple.newbedwarshelper.client.utils.bedwars;
 import java.util.Optional;
 import java.util.Set;
 import net.minecraft.ChatFormatting;
+import net.minecraft.world.scores.TeamColor;
 
 public record BedwarsTeamMarker(ChatFormatting color, String letter) {
     public static final BedwarsTeamMarker RED = new BedwarsTeamMarker(ChatFormatting.RED, "R");
@@ -29,7 +30,29 @@ public record BedwarsTeamMarker(ChatFormatting color, String letter) {
         return Optional.empty();
     }
 
+    public static Optional<BedwarsTeamMarker> fromColor(Optional<TeamColor> color) {
+        return color.flatMap(BedwarsTeamMarker::fromColor);
+    }
+
+    public static Optional<BedwarsTeamMarker> fromColor(TeamColor color) {
+        return fromColor(toChatFormatting(color));
+    }
+
+    private static ChatFormatting toChatFormatting(TeamColor color) {
+        return switch (color) {
+            case RED -> ChatFormatting.RED;
+            case BLUE -> ChatFormatting.BLUE;
+            case GREEN -> ChatFormatting.GREEN;
+            case YELLOW -> ChatFormatting.YELLOW;
+            case AQUA -> ChatFormatting.AQUA;
+            case WHITE -> ChatFormatting.WHITE;
+            case LIGHT_PURPLE -> ChatFormatting.LIGHT_PURPLE;
+            case GRAY -> ChatFormatting.GRAY;
+            default -> null;
+        };
+    }
+
     public String debugName() {
-        return letter + "/" + color.getName();
+        return letter + "/" + color.name().toLowerCase();
     }
 }

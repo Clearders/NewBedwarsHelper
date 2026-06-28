@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 
 public final class WeballCommand {
     private static final Logger LOGGER = LoggerFactory.getLogger(ModConstants.MOD_ID);
-    private static final RateLimiter RATE_LIMITER = new RateLimiter(2, 1.0, 800);
+    private static final RateLimiter RATE_LIMITER = new RateLimiter(2, 1.0, 900);
     private static final double DEFAULT_DANGEROUS_PLAYERS_KD_THRESHOLD = 1.0;
 
     private static final String THRESHOLD_CURRENT_KEY = "commands.newbedwarshelper.weball.threshold.current";

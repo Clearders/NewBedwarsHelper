@@ -4,6 +4,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -50,7 +51,7 @@ public final class EspTargetStorage {
         }
 
         if (!(entity instanceof LivingEntity)) {
-            return entity.getType() != EntityType.ITEM && isEntityTypeIspEnabled(entity.getType());
+            return entity.getType() != EntityTypes.ITEM && isEntityTypeIspEnabled(entity.getType());
         }
 
         return isEntityTypeIspEnabled(entity.getType());
@@ -306,7 +307,7 @@ public final class EspTargetStorage {
     }
 
     private static boolean includesWitherSkull(List<EntityType<?>> entityTypes) {
-        return entityTypes.contains(EntityType.WITHER_SKULL);
+        return entityTypes.contains(EntityTypes.WITHER_SKULL);
     }
 
     private static boolean areAllBlockEntityTargetsPersistentlyEnabled(List<EspBlockEntityTarget> targets) {
@@ -332,7 +333,7 @@ public final class EspTargetStorage {
             whitelist.put(entityType, Boolean.FALSE);
         }
 
-        whitelist.put(EntityType.PLAYER, Boolean.TRUE);
+        whitelist.put(EntityTypes.PLAYER, Boolean.TRUE);
         return whitelist;
     }
 

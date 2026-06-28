@@ -4,6 +4,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.projectile.hurtingprojectile.WitherSkull;
 import org.exmple.newbedwarshelper.client.z_config.ModConfig;
 
@@ -185,7 +186,7 @@ public final class HitboxEnhanceTargetStorage {
     }
 
     private static boolean includesWitherSkull(List<EntityType<?>> entityTypes) {
-        return entityTypes.contains(EntityType.WITHER_SKULL);
+        return entityTypes.contains(EntityTypes.WITHER_SKULL);
     }
 
     private static Map<EntityType<?>, Boolean> createDefaultWhitelist() {

@@ -55,7 +55,7 @@ public class KeyMappingManager {
         }
 
         while (OPEN_ESP_WHITELIST_CONFIG_KEY.consumeClick()) {
-            client.setScreen(new ModScreen(client, client.screen));
+            client.gui.setScreen(new ModScreen(client, client.gui.screen()));
         }
 
         while (TOGGLE_GLOBAL_ESP_KEY.consumeClick()) {
