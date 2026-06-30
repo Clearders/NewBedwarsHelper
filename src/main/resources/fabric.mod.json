@@ -25,6 +25,10 @@
     {
       "config": "newbedwarshelper.client.mixins.json",
       "environment": "client"
+    },
+    {
+      "config": "newbedwarshelper.iris.mixins.json",
+      "environment": "client"
     }
   ],
   "depends": {

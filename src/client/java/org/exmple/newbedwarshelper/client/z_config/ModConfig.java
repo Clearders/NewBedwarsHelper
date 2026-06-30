@@ -23,6 +23,7 @@ public class ModConfig {
     public IspConfig isp = new IspConfig();
     public ItemModelEnhanceConfig itemModelEnhance = new ItemModelEnhanceConfig();
     public StatsFetcherConfig statsFetcher = new StatsFetcherConfig();
+    public GammaOverrideConfig gammaOverride = new GammaOverrideConfig();
 
     public static ModConfig getInstance() {
         if (instance == null) {
@@ -40,6 +41,7 @@ public class ModConfig {
                 ModConfig config = GSON.fromJson(content, ModConfig.class);
                 if (config != null) {
                     config.ensureDefaults();
+                    config.save();
                     return config;
                 }
             } catch (IOException exception) {
@@ -86,11 +88,15 @@ public class ModConfig {
         if (statsFetcher == null) {
             statsFetcher = new StatsFetcherConfig();
         }
+        if (gammaOverride == null) {
+            gammaOverride = new GammaOverrideConfig();
+        }
         esp.ensureDefaults();
         hitboxEnhance.ensureDefaults();
         isp.ensureDefaults();
         itemModelEnhance.ensureDefaults();
         statsFetcher.ensureDefaults();
+        gammaOverride.ensureDefaults();
     }
 
     private static Path getConfigPath() {
@@ -174,5 +180,21 @@ public class ModConfig {
                 copyTextInEnglish = false;
             }
         }
+    }
+
+    public static class GammaOverrideConfig {
+        public boolean enabled = false;
+        public GammaOverrideMode mode = GammaOverrideMode.NIGHT_VISION;
+
+        private void ensureDefaults() {
+            if (mode == null) {
+                mode = GammaOverrideMode.NIGHT_VISION;
+            }
+        }
+    }
+
+    public enum GammaOverrideMode {
+        NIGHT_VISION,
+        INVALID_GAMMA
     }
 }

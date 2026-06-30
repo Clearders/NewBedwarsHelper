@@ -10,11 +10,14 @@ import net.minecraft.resources.Identifier;
 import org.exmple.newbedwarshelper.ModConstants;
 import org.exmple.newbedwarshelper.client.antiafk.AntiAFKManager;
 import org.exmple.newbedwarshelper.client.esp.EspTargetStorage;
+import org.exmple.newbedwarshelper.client.gammaoverride.GammaOverrideManager;
 import org.lwjgl.glfw.GLFW;
 
 public class KeyMappingManager {
     private static final String ESP_ON_KEY = "overlay.newbedwarshelper.esp.on";
     private static final String ESP_OFF_KEY = "overlay.newbedwarshelper.esp.off";
+    private static final String GAMMA_OVERRIDE_ON_KEY = "overlay.newbedwarshelper.gamma_override.on";
+    private static final String GAMMA_OVERRIDE_OFF_KEY = "overlay.newbedwarshelper.gamma_override.off";
 
     private static final KeyMapping.Category CUSTOM_KEY_CATEGORY = KeyMapping.Category.register(
             Identifier.fromNamespaceAndPath(ModConstants.MOD_ID, "bed_wars_helper")
@@ -34,6 +37,11 @@ public class KeyMappingManager {
             GLFW.GLFW_KEY_F8,
             CUSTOM_KEY_CATEGORY
     );
+    private static final KeyMapping TOGGLE_GAMMA_OVERRIDE_KEY = new KeyMapping(
+            "key.newbedwarshelper.toggle_gamma_override",
+            GLFW.GLFW_KEY_UNKNOWN,
+            CUSTOM_KEY_CATEGORY
+    );
     private static boolean initialized;
     private static boolean resetOnNextJoin = true;
 
@@ -45,6 +53,7 @@ public class KeyMappingManager {
         KeyMappingHelper.registerKeyMapping(OPEN_ESP_WHITELIST_CONFIG_KEY);
         KeyMappingHelper.registerKeyMapping(TOGGLE_GLOBAL_ESP_KEY);
         KeyMappingHelper.registerKeyMapping(TOGGLE_ANTI_AFK_KEY);
+        KeyMappingHelper.registerKeyMapping(TOGGLE_GAMMA_OVERRIDE_KEY);
         ClientTickEvents.END_CLIENT_TICK.register(KeyMappingManager::onClientTick);
         initialized = true;
     }
@@ -75,6 +84,16 @@ public class KeyMappingManager {
 
         while (TOGGLE_ANTI_AFK_KEY.consumeClick()) {
             AntiAFKManager.toggle();
+        }
+
+        while (TOGGLE_GAMMA_OVERRIDE_KEY.consumeClick()) {
+            boolean enabled = GammaOverrideManager.toggleEnabled();
+
+            if (client.player != null) {
+                Component text = Component.translatable(enabled ? GAMMA_OVERRIDE_ON_KEY : GAMMA_OVERRIDE_OFF_KEY)
+                        .withStyle(enabled ? ChatFormatting.GREEN : ChatFormatting.RED);
+                client.player.sendOverlayMessage(text);
+            }
         }
 
         AntiAFKManager.update(client.player);

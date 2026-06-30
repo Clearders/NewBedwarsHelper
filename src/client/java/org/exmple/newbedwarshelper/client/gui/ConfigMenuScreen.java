@@ -15,6 +15,7 @@ public class ConfigMenuScreen extends Screen {
     private static final Component STATS_FETCHER_CONFIG_TEXT=Component.translatable("screen.newbedwarshelper.config.stats_fetcher");
     private static final Component HITBOX_ENHANCE_CONFIG_TEXT = Component.translatable("screen.newbedwarshelper.config.hitbox_enhance");
     private static final Component ISP_CONFIG_TEXT = Component.translatable("screen.newbedwarshelper.config.isp");
+    private static final Component GAMMA_OVERRIDE_CONFIG_TEXT = Component.translatable("screen.newbedwarshelper.config.gamma_override");
     private static final Component DONE_TEXT = Component.translatable("screen.newbedwarshelper.config.done");
     private static final int BUTTON_WIDTH = 150;
 
@@ -43,6 +44,9 @@ public class ConfigMenuScreen extends Screen {
                 .width(BUTTON_WIDTH)
                 .build(), gridLayout.newCellSettings().paddingTop(5));
         helper.addChild(Button.builder(ISP_CONFIG_TEXT, button -> this.minecraft.gui.setScreen(new IspConfigScreen(this.minecraft, this)))
+                .width(BUTTON_WIDTH)
+                .build(), gridLayout.newCellSettings().paddingTop(5));
+        helper.addChild(Button.builder(GAMMA_OVERRIDE_CONFIG_TEXT, button -> this.minecraft.gui.setScreen(new GammaOverrideConfigScreen(this.minecraft, this)))
                 .width(BUTTON_WIDTH)
                 .build(), gridLayout.newCellSettings().paddingTop(5));
         helper.addChild(Button.builder(DONE_TEXT, button -> this.onClose())
