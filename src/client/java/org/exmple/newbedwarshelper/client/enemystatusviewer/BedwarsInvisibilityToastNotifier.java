@@ -1,6 +1,8 @@
 package org.exmple.newbedwarshelper.client.enemystatusviewer;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -26,9 +28,11 @@ public final class BedwarsInvisibilityToastNotifier {
     private static final String TITLE_KEY = "toast.newbedwarshelper.enemy_invis.title";
     private static final String MESSAGE_KEY = "toast.newbedwarshelper.enemy_invis.message";
     private static final int SCAN_INTERVAL_TICKS = 20;
+    private static final int RAW_ONLY_CONFIRMATION_SCANS = 2;
 
     private static final Set<UUID> invisiblePlayers = new HashSet<>();
     private static final Set<UUID> ignoredNegativeDurationPlayers = new HashSet<>();
+    private static final Map<UUID, Integer> pendingRawInvisibleScans = new HashMap<>();
     private static int ticksUntilNextScan;
 
     private BedwarsInvisibilityToastNotifier() {
@@ -61,12 +65,15 @@ public final class BedwarsInvisibilityToastNotifier {
         if (packet.getEffectDurationTicks() < 0) {
             ignoredNegativeDurationPlayers.add(player.getUUID());
             invisiblePlayers.remove(player.getUUID());
+            pendingRawInvisibleScans.remove(player.getUUID());
             return;
         }
         ignoredNegativeDurationPlayers.remove(player.getUUID());
+        pendingRawInvisibleScans.remove(player.getUUID());
 
         if (!isListed(player)) {
             invisiblePlayers.remove(player.getUUID());
+            pendingRawInvisibleScans.remove(player.getUUID());
             return;
         }
 
@@ -101,12 +108,14 @@ public final class BedwarsInvisibilityToastNotifier {
         if (entity != null) {
             invisiblePlayers.remove(entity.getUUID());
             ignoredNegativeDurationPlayers.remove(entity.getUUID());
+            pendingRawInvisibleScans.remove(entity.getUUID());
         }
     }
 
     public static void clear() {
         invisiblePlayers.clear();
         ignoredNegativeDurationPlayers.clear();
+        pendingRawInvisibleScans.clear();
         ticksUntilNextScan = 0;
     }
 
@@ -119,17 +128,20 @@ public final class BedwarsInvisibilityToastNotifier {
 
         if (!BedwarsGameDetector.isInGame()) {
             invisiblePlayers.clear();
+            pendingRawInvisibleScans.clear();
             return;
         }
 
         if (client.level == null || client.player == null) {
             invisiblePlayers.clear();
+            pendingRawInvisibleScans.clear();
             return;
         }
 
         Optional<BedwarsTeamMarker> selfMarker = BedwarsGameDetector.getCurrentSelfTeamMarker(client);
         if (selfMarker.isEmpty()) {
             invisiblePlayers.clear();
+            pendingRawInvisibleScans.clear();
             return;
         }
 
@@ -142,17 +154,20 @@ public final class BedwarsInvisibilityToastNotifier {
             if (!isListed(player)) {
                 invisiblePlayers.remove(player.getUUID());
                 ignoredNegativeDurationPlayers.remove(player.getUUID());
+                pendingRawInvisibleScans.remove(player.getUUID());
                 continue;
             }
 
             if (ignoredNegativeDurationPlayers.contains(player.getUUID())) {
                 invisiblePlayers.remove(player.getUUID());
+                pendingRawInvisibleScans.remove(player.getUUID());
                 continue;
             }
 
             PlayerInvisibilityTarget target = getEnemyTarget(client, player, selfMarker.get());
             if (target == null) {
                 invisiblePlayers.remove(player.getUUID());
+                pendingRawInvisibleScans.remove(player.getUUID());
                 continue;
             }
 
@@ -161,14 +176,26 @@ public final class BedwarsInvisibilityToastNotifier {
             boolean invisible = hasInvisibilityEffect || rawSharedInvisible;
             if (!invisible) {
                 invisiblePlayers.remove(player.getUUID());
+                pendingRawInvisibleScans.remove(player.getUUID());
                 continue;
             }
 
             currentlyInvisible.add(player.getUUID());
-            showToastOnce(client, player, target.marker);
+            if (hasInvisibilityEffect) {
+                pendingRawInvisibleScans.remove(player.getUUID());
+                showToastOnce(client, player, target.marker);
+            } else if (isRawOnlyInvisibleConfirmed(client, player, target.marker)) {
+                showToastOnce(client, player, target.marker);
+            }
         }
 
         invisiblePlayers.retainAll(currentlyInvisible);
+        pendingRawInvisibleScans.keySet().retainAll(currentlyInvisible);
+    }
+
+    private static boolean isRawOnlyInvisibleConfirmed(Minecraft client, AbstractClientPlayer player, BedwarsTeamMarker marker) {
+        int scans = pendingRawInvisibleScans.merge(player.getUUID(), 1, Integer::sum);
+        return scans >= RAW_ONLY_CONFIRMATION_SCANS;
     }
 
     private static PlayerInvisibilityTarget getEnemyTarget(Minecraft client, AbstractClientPlayer player, BedwarsTeamMarker selfMarker) {

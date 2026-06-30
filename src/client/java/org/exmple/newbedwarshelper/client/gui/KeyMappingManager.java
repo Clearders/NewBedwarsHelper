@@ -13,6 +13,9 @@ import org.exmple.newbedwarshelper.client.esp.EspTargetStorage;
 import org.lwjgl.glfw.GLFW;
 
 public class KeyMappingManager {
+    private static final String ESP_ON_KEY = "overlay.newbedwarshelper.esp.on";
+    private static final String ESP_OFF_KEY = "overlay.newbedwarshelper.esp.off";
+
     private static final KeyMapping.Category CUSTOM_KEY_CATEGORY = KeyMapping.Category.register(
             Identifier.fromNamespaceAndPath(ModConstants.MOD_ID, "bed_wars_helper")
     );
@@ -63,7 +66,8 @@ public class KeyMappingManager {
             EspTargetStorage.setGlobalEspEnabled(enabled);
 
             if (client.player != null) {
-                Component text = Component.literal(enabled ? "ESP:ON" : "ESP:OFF")
+                Component text = Component.literal("ESP:")
+                        .append(Component.translatable(enabled ? ESP_ON_KEY : ESP_OFF_KEY))
                         .withStyle(enabled ? ChatFormatting.GREEN : ChatFormatting.RED);
                 client.player.sendOverlayMessage(text);
             }

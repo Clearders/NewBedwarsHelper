@@ -23,6 +23,7 @@ public final class MultilineSystemToast implements Toast {
     private static final int MARGIN = 10;
     private static final long DISPLAY_TIME_MS = 5000L;
     private static final long CONTAINER_DEFER_TIMEOUT_MS = 10000L;
+    private static final String ELAPSED_SUFFIX_KEY = "toast.newbedwarshelper.elapsed_suffix";
     private static final Deque<PendingToast> pendingToasts = new ArrayDeque<>();
 
     private final Component title;
@@ -177,7 +178,7 @@ public final class MultilineSystemToast implements Toast {
         long elapsedSeconds = Math.max(0L, (displayTimestampMs - eventTimestampMs) / 1000L);
         return Component.empty()
                 .append(message)
-                .append(Component.literal(" (" + elapsedSeconds + "s ago)"));
+                .append(Component.translatable(ELAPSED_SUFFIX_KEY, elapsedSeconds + "s"));
     }
 
     private static boolean isContainerScreenOpen(Minecraft client) {

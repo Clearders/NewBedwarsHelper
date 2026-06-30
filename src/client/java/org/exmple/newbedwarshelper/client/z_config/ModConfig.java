@@ -90,6 +90,7 @@ public class ModConfig {
         hitboxEnhance.ensureDefaults();
         isp.ensureDefaults();
         itemModelEnhance.ensureDefaults();
+        statsFetcher.ensureDefaults();
     }
 
     private static Path getConfigPath() {
@@ -153,6 +154,25 @@ public class ModConfig {
         public boolean showDoublesFinalKD = true;
         public boolean showQuadsFinalKD = true;
         public boolean showTotalWins = true;
+        public Boolean skipOwnTeamInGame = true;
+        public Boolean autoWeballOnGameStart = false;
+        public Boolean copyButtonsEnabled = true;
+        public Boolean copyTextInEnglish = false;
         public double dangerousPlayersKDThreshold = 1.0;
+
+        private void ensureDefaults() {
+            if (skipOwnTeamInGame == null) {
+                skipOwnTeamInGame = true;
+            }
+            if (autoWeballOnGameStart == null) {
+                autoWeballOnGameStart = false;
+            }
+            if (copyButtonsEnabled == null) {
+                copyButtonsEnabled = true;
+            }
+            if (copyTextInEnglish == null) {
+                copyTextInEnglish = false;
+            }
+        }
     }
 }
