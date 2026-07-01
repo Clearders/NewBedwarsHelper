@@ -25,6 +25,7 @@
   "screen.newbedwarshelper.gamma_override.enabled.off": "Full Bright: 关",
   "screen.newbedwarshelper.gamma_override.mode.night_vision": "覆写模式: 夜视模式",
   "screen.newbedwarshelper.gamma_override.mode.invalid_gamma": "覆写模式: 非法伽马值模式",
+  "screen.newbedwarshelper.gamma_override.mode.invalid_gamma.shader_incompatible": "此模式可能与光影不兼容！",
   "screen.newbedwarshelper.gamma_override.done": "完成",
   "screen.newbedwarshelper.stats_fetcher.title": "数据抓取器配置",
   "screen.newbedwarshelper.stats_fetcher.show_dangerous_players.on": "显示危险玩家:开启",

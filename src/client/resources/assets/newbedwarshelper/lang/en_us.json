@@ -25,6 +25,7 @@
   "screen.newbedwarshelper.gamma_override.enabled.off": "Full Bright: OFF",
   "screen.newbedwarshelper.gamma_override.mode.night_vision": "Override Mode: Night Vision Mode",
   "screen.newbedwarshelper.gamma_override.mode.invalid_gamma": "Override Mode: Invalid Gamma Mode",
+  "screen.newbedwarshelper.gamma_override.mode.invalid_gamma.shader_incompatible": "This mode may be incompatible with shaders!",
   "screen.newbedwarshelper.gamma_override.done": "Done",
   "screen.newbedwarshelper.stats_fetcher.title": "Stats Fetcher Config",
   "screen.newbedwarshelper.stats_fetcher.show_dangerous_players.on": "Show Dangerous Players: On",
