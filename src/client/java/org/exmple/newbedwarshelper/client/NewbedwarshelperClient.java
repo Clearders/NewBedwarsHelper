@@ -3,7 +3,7 @@ package org.exmple.newbedwarshelper.client;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import org.exmple.newbedwarshelper.client.antiafk.AntiAFKManager;
-import org.exmple.newbedwarshelper.client.esp.EspTargetStorage;
+import org.exmple.newbedwarshelper.client.esp.EspStorageManager;
 import org.exmple.newbedwarshelper.client.enemystatusviewer.BedwarsInvisibilityToastNotifier;
 import org.exmple.newbedwarshelper.client.enemystatusviewer.BedwarsProtectionTracker;
 import org.exmple.newbedwarshelper.client.gammaoverride.GammaOverrideManager;
@@ -27,7 +27,7 @@ public class NewbedwarshelperClient implements ClientModInitializer {
         GammaOverrideManager.init();
         KeyMappingManager.init();
         MultilineSystemToast.init();
-        EspTargetStorage.init();
+        EspStorageManager.init();
         HitboxEnhanceTargetStorage.init();
         IspTargetStorage.init();
         ItemScaleRegistry.init();
@@ -39,7 +39,7 @@ public class NewbedwarshelperClient implements ClientModInitializer {
         WeballCommand.register();
         ImeCommand.register();
         ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {
-            EspTargetStorage.clearTemporaryOverrides();
+            EspStorageManager.clearTemporaryOverrides();
             HitboxEnhanceTargetStorage.clearTemporaryOverrides();
             IspTargetStorage.clearTemporaryOverrides();
             AsyncExecutor.shutdown();

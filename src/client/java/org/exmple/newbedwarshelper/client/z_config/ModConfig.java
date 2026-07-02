@@ -111,6 +111,7 @@ public class ModConfig {
     public static class EspConfig {
         public Map<String, Boolean> entityWhitelist = new LinkedHashMap<>();
         public Map<String, Boolean> blockEntityWhitelist = new LinkedHashMap<>();
+        public Map<String, Boolean> blockWhitelist = new LinkedHashMap<>();
         public boolean dangerousWitherSkullWhitelist = false;
 
         private void ensureDefaults() {
@@ -119,6 +120,9 @@ public class ModConfig {
             }
             if (blockEntityWhitelist == null) {
                 blockEntityWhitelist = new LinkedHashMap<>();
+            }
+            if (blockWhitelist == null) {
+                blockWhitelist = new LinkedHashMap<>();
             }
         }
     }

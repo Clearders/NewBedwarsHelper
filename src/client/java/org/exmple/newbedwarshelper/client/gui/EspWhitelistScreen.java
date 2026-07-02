@@ -24,6 +24,10 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
+import org.exmple.newbedwarshelper.client.esp.block.EspBlockGroup;
+import org.exmple.newbedwarshelper.client.esp.block.EspBlockGroups;
+import org.exmple.newbedwarshelper.client.esp.block.EspBlockStorage;
+import org.exmple.newbedwarshelper.client.esp.block.EspBlockTarget;
 import org.exmple.newbedwarshelper.client.esp.blockentity.EspBlockEntityGroup;
 import org.exmple.newbedwarshelper.client.esp.blockentity.EspBlockEntityGroups;
 import org.exmple.newbedwarshelper.client.esp.blockentity.EspBlockEntityStorage;
@@ -37,6 +41,7 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
@@ -49,7 +54,6 @@ public class EspWhitelistScreen extends Screen {
     private static final Component ENTITY_TAB_TEXT = Component.translatable("screen.newbedwarshelper.esp_whitelist.tab.entity");
     private static final Component BLOCK_ENTITY_TAB_TEXT = Component.translatable("screen.newbedwarshelper.esp_whitelist.tab.block_entity");
     private static final Component BLOCK_TAB_TEXT = Component.translatable("screen.newbedwarshelper.esp_whitelist.tab.block");
-    private static final Component EMPTY_BLOCK_TAB_TEXT = Component.translatable("screen.newbedwarshelper.esp_whitelist.block.empty");
     private static final Component ENABLE_TEXT = Component.translatable("screen.newbedwarshelper.esp_whitelist.enable");
     private static final Component DISABLE_TEXT = Component.translatable("screen.newbedwarshelper.esp_whitelist.disable");
     private static final Component GROUP_ENABLE_ALL_TEXT = Component.translatable("screen.newbedwarshelper.esp_whitelist.group_enable_all");
@@ -228,7 +232,7 @@ public class EspWhitelistScreen extends Screen {
 
     private void updateTabButtons() {
         if (this.resetButton != null) {
-            this.resetButton.active = this.selectedTab != EspTabId.BLOCK;
+            this.resetButton.active = true;
         }
     }
 
@@ -236,9 +240,7 @@ public class EspWhitelistScreen extends Screen {
         switch (this.selectedTab) {
             case ENTITY -> EspEntityStorage.resetWhitelistToDefaults();
             case BLOCK_ENTITY -> EspBlockEntityStorage.resetWhitelistToDefaults();
-            case BLOCK -> {
-                return;
-            }
+            case BLOCK -> EspBlockStorage.resetWhitelistToDefaults();
         }
         this.updateRowVisibilityAndPositions();
     }
@@ -358,7 +360,9 @@ public class EspWhitelistScreen extends Screen {
     }
 
     private void buildBlockRows() {
-        this.allRows.add(Row.message(EspTabId.BLOCK, EMPTY_BLOCK_TAB_TEXT));
+        for (EspBlockGroup group : EspBlockGroups.ALL) {
+            addBlockGroup(group);
+        }
     }
 
     private void addGroup(EspEntityGroup group) {
@@ -411,7 +415,7 @@ public class EspWhitelistScreen extends Screen {
         this.addRenderableWidget(groupControls.groupToggleButton);
         this.addRenderableWidget(groupControls.tempToggleButton);
 
-        for (EspBlockEntityTarget target : group.targets()) {
+        for (EspBlockEntityTarget target : sortedByTranslatedName(group.targets(), EspBlockEntityTarget::translationKey)) {
             Component label = Component.translatable(target.translationKey());
             Row row = Row.blockEntityTarget(target, label);
             this.allRows.add(row);
@@ -446,6 +450,30 @@ public class EspWhitelistScreen extends Screen {
                 graphics.text(this.font, row.label, x, y + 6, ITEM_TEXT_COLOR);
             }
         }
+    }
+
+    private void addBlockGroup(EspBlockGroup group) {
+        Component groupTitle = Component.translatable(group.titleKey());
+        Row header = Row.header(EspTabId.BLOCK, groupTitle);
+        this.allRows.add(header);
+        Row groupControls = Row.blockGroupControls(group, groupTitle.getString());
+        this.allRows.add(groupControls);
+        this.addRenderableWidget(groupControls.groupToggleButton);
+        this.addRenderableWidget(groupControls.tempToggleButton);
+
+        for (EspBlockTarget target : sortedByTranslatedName(group.targets(), EspBlockTarget::translationKey)) {
+            Component label = Component.translatable(target.translationKey());
+            Row row = Row.blockTarget(target, label);
+            this.allRows.add(row);
+            this.addRenderableWidget(row.enableButton);
+            this.addRenderableWidget(row.disableButton);
+        }
+    }
+
+    private static <T> List<T> sortedByTranslatedName(List<T> targets, java.util.function.Function<T, String> translationKeyGetter) {
+        List<T> sortedTargets = new ArrayList<>(targets);
+        sortedTargets.sort(Comparator.comparing(target -> Component.translatable(translationKeyGetter.apply(target)).getString(), String.CASE_INSENSITIVE_ORDER));
+        return sortedTargets;
     }
 
     private void drawClippedRows(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
@@ -506,14 +534,16 @@ public class EspWhitelistScreen extends Screen {
         private final List<EntityType<?>> entityTypes;
         private final boolean dangerousWitherSkull;
         private final EspBlockEntityTarget blockEntityTarget;
+        private final EspBlockTarget blockTarget;
         private final EspEntityGroup group;
         private final EspBlockEntityGroup blockEntityGroup;
+        private final EspBlockGroup blockGroup;
         private final Button enableButton;
         private final Button disableButton;
         private final Button groupToggleButton;
         private final Button tempToggleButton;
 
-        private Row(EspTabId tab, boolean isHeader, Component label, String searchText, EntityType<?> entityType, List<EntityType<?>> entityTypes, boolean dangerousWitherSkull, EspBlockEntityTarget blockEntityTarget, EspEntityGroup group, EspBlockEntityGroup blockEntityGroup, Button enableButton, Button disableButton, Button groupToggleButton, Button tempToggleButton) {
+        private Row(EspTabId tab, boolean isHeader, Component label, String searchText, EntityType<?> entityType, List<EntityType<?>> entityTypes, boolean dangerousWitherSkull, EspBlockEntityTarget blockEntityTarget, EspBlockTarget blockTarget, EspEntityGroup group, EspBlockEntityGroup blockEntityGroup, EspBlockGroup blockGroup, Button enableButton, Button disableButton, Button groupToggleButton, Button tempToggleButton) {
             this.tab = tab;
             this.isHeader = isHeader;
             this.label = label;
@@ -522,8 +552,10 @@ public class EspWhitelistScreen extends Screen {
             this.entityTypes = entityTypes;
             this.dangerousWitherSkull = dangerousWitherSkull;
             this.blockEntityTarget = blockEntityTarget;
+            this.blockTarget = blockTarget;
             this.group = group;
             this.blockEntityGroup = blockEntityGroup;
+            this.blockGroup = blockGroup;
             this.enableButton = enableButton;
             this.disableButton = disableButton;
             this.groupToggleButton = groupToggleButton;
@@ -531,11 +563,11 @@ public class EspWhitelistScreen extends Screen {
         }
 
         private static Row header(EspTabId tab, Component label) {
-            return new Row(tab, true, label, label.getString(), null, null, false, null, null, null, null, null, null, null);
+            return new Row(tab, true, label, label.getString(), null, null, false, null, null, null, null, null, null, null, null, null);
         }
 
         private static Row message(EspTabId tab, Component label) {
-            return new Row(tab, true, label, label.getString(), null, null, false, null, null, null, null, null, null, null);
+            return new Row(tab, true, label, label.getString(), null, null, false, null, null, null, null, null, null, null, null, null);
         }
 
         private static Row groupControls(EspEntityGroup group, String groupName) {
@@ -545,7 +577,7 @@ public class EspWhitelistScreen extends Screen {
             Button tempToggleButton = Button.builder(Component.empty(), ignored -> EspEntityStorage.cycleGroupTempToggleMode(group.entityTypes()))
                     .bounds(0, 0, GROUP_BUTTON_WIDTH, 20)
                     .build();
-            return new Row(EspTabId.ENTITY, false, Component.empty(), groupName, null, null, false, null, group, null, null, null, groupToggleButton, tempToggleButton);
+            return new Row(EspTabId.ENTITY, false, Component.empty(), groupName, null, null, false, null, null, group, null, null, null, null, groupToggleButton, tempToggleButton);
         }
 
         private static Row blockEntityGroupControls(EspBlockEntityGroup group, String groupName) {
@@ -555,7 +587,17 @@ public class EspWhitelistScreen extends Screen {
             Button tempToggleButton = Button.builder(Component.empty(), ignored -> EspBlockEntityStorage.cycleBlockEntityGroupTempToggleMode(group.targets()))
                     .bounds(0, 0, GROUP_BUTTON_WIDTH, 20)
                     .build();
-            return new Row(EspTabId.BLOCK_ENTITY, false, Component.empty(), groupName, null, null, false, null, null, group, null, null, groupToggleButton, tempToggleButton);
+            return new Row(EspTabId.BLOCK_ENTITY, false, Component.empty(), groupName, null, null, false, null, null, null, group, null, null, null, groupToggleButton, tempToggleButton);
+        }
+
+        private static Row blockGroupControls(EspBlockGroup group, String groupName) {
+            Button groupToggleButton = Button.builder(Component.empty(), ignored -> EspBlockStorage.applyNextBlockGroupToggleAction(group.targets()))
+                    .bounds(0, 0, GROUP_BUTTON_WIDTH, 20)
+                    .build();
+            Button tempToggleButton = Button.builder(Component.empty(), ignored -> EspBlockStorage.cycleBlockGroupTempToggleMode(group.targets()))
+                    .bounds(0, 0, GROUP_BUTTON_WIDTH, 20)
+                    .build();
+            return new Row(EspTabId.BLOCK, false, Component.empty(), groupName, null, null, false, null, null, null, null, group, null, null, groupToggleButton, tempToggleButton);
         }
 
         private static Row entity(EntityType<?> entityType, Component label, String idPath) {
@@ -566,7 +608,7 @@ public class EspWhitelistScreen extends Screen {
                     .bounds(0, 0, BUTTON_WIDTH, 20)
                     .build();
             String searchText = idPath + " " + label.getString();
-            return new Row(EspTabId.ENTITY, false, label, searchText, entityType, null, false, null, null, null, enableButton, disableButton, null, null);
+            return new Row(EspTabId.ENTITY, false, label, searchText, entityType, null, false, null, null, null, null, null, enableButton, disableButton, null, null);
         }
 
         private static Row entityTypes(List<EntityType<?>> entityTypes, Component label, String searchText) {
@@ -576,7 +618,7 @@ public class EspWhitelistScreen extends Screen {
             Button disableButton = Button.builder(DISABLE_TEXT, ignored -> EspEntityStorage.setEntityTypesEspEnabled(entityTypes, false))
                     .bounds(0, 0, BUTTON_WIDTH, 20)
                     .build();
-            return new Row(EspTabId.ENTITY, false, label, searchText + " " + label.getString(), null, entityTypes, false, null, null, null, enableButton, disableButton, null, null);
+            return new Row(EspTabId.ENTITY, false, label, searchText + " " + label.getString(), null, entityTypes, false, null, null, null, null, null, enableButton, disableButton, null, null);
         }
 
         private static Row dangerousWitherSkull(Component label) {
@@ -587,7 +629,7 @@ public class EspWhitelistScreen extends Screen {
                     .bounds(0, 0, BUTTON_WIDTH, 20)
                     .build();
             String searchText = "wither_skull dangerous " + label.getString();
-            return new Row(EspTabId.ENTITY, false, label, searchText, null, null, true, null, null, null, enableButton, disableButton, null, null);
+            return new Row(EspTabId.ENTITY, false, label, searchText, null, null, true, null, null, null, null, null, enableButton, disableButton, null, null);
         }
 
         private static Row blockEntityTarget(EspBlockEntityTarget target, Component label) {
@@ -598,7 +640,22 @@ public class EspWhitelistScreen extends Screen {
                     .bounds(0, 0, BUTTON_WIDTH, 20)
                     .build();
             String searchText = target.id() + " " + label.getString();
-            return new Row(EspTabId.BLOCK_ENTITY, false, label, searchText, null, null, false, target, null, null, enableButton, disableButton, null, null);
+            return new Row(EspTabId.BLOCK_ENTITY, false, label, searchText, null, null, false, target, null, null, null, null, enableButton, disableButton, null, null);
+        }
+
+        private static Row blockTarget(EspBlockTarget target, Component label) {
+            Button enableButton = Button.builder(ENABLE_TEXT, ignored -> EspBlockStorage.setBlockTargetEspEnabled(target, true))
+                    .bounds(0, 0, BUTTON_WIDTH, 20)
+                    .build();
+            Button disableButton = Button.builder(DISABLE_TEXT, ignored -> EspBlockStorage.setBlockTargetEspEnabled(target, false))
+                    .bounds(0, 0, BUTTON_WIDTH, 20)
+                    .build();
+            StringBuilder searchText = new StringBuilder(target.id()).append(' ').append(label.getString());
+            for (var block : target.blocks()) {
+                Identifier id = BuiltInRegistries.BLOCK.getKey(block);
+                searchText.append(' ').append(id);
+            }
+            return new Row(EspTabId.BLOCK, false, label, searchText.toString(), null, null, false, null, target, null, null, null, enableButton, disableButton, null, null);
         }
 
         private void refreshButtons() {
@@ -624,6 +681,10 @@ public class EspWhitelistScreen extends Screen {
                 boolean enabled = EspBlockEntityStorage.isBlockEntityTargetPersistentlyEspEnabled(this.blockEntityTarget);
                 this.enableButton.active = !enabled;
                 this.disableButton.active = enabled;
+            } else if (this.blockTarget != null) {
+                boolean enabled = EspBlockStorage.isBlockTargetPersistentlyEspEnabled(this.blockTarget);
+                this.enableButton.active = !enabled;
+                this.disableButton.active = enabled;
             } else if (this.group != null) {
                 EspToggleAction action = EspEntityStorage.getNextGroupToggleAction(this.group.entityTypes());
                 this.groupToggleButton.setMessage(action == EspToggleAction.ENABLE_ALL ? GROUP_ENABLE_ALL_TEXT : GROUP_DISABLE_ALL_TEXT);
@@ -632,6 +693,10 @@ public class EspWhitelistScreen extends Screen {
                 EspToggleAction action = EspBlockEntityStorage.getNextBlockEntityGroupToggleAction(this.blockEntityGroup.targets());
                 this.groupToggleButton.setMessage(action == EspToggleAction.ENABLE_ALL ? GROUP_ENABLE_ALL_TEXT : GROUP_DISABLE_ALL_TEXT);
                 this.tempToggleButton.setMessage(getTempToggleText(EspBlockEntityStorage.getBlockEntityGroupTempToggleMode(this.blockEntityGroup.targets())));
+            } else if (this.blockGroup != null) {
+                EspToggleAction action = EspBlockStorage.getNextBlockGroupToggleAction(this.blockGroup.targets());
+                this.groupToggleButton.setMessage(action == EspToggleAction.ENABLE_ALL ? GROUP_ENABLE_ALL_TEXT : GROUP_DISABLE_ALL_TEXT);
+                this.tempToggleButton.setMessage(getTempToggleText(EspBlockStorage.getBlockGroupTempToggleMode(this.blockGroup.targets())));
             }
         }
 

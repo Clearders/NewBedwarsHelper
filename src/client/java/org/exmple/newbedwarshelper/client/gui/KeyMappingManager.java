@@ -9,7 +9,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import org.exmple.newbedwarshelper.ModConstants;
 import org.exmple.newbedwarshelper.client.antiafk.AntiAFKManager;
-import org.exmple.newbedwarshelper.client.esp.EspTargetStorage;
+import org.exmple.newbedwarshelper.client.esp.EspStorageManager;
 import org.exmple.newbedwarshelper.client.gammaoverride.GammaOverrideManager;
 import org.lwjgl.glfw.GLFW;
 
@@ -62,7 +62,7 @@ public class KeyMappingManager {
         if (client.player == null || client.level == null) {
             resetOnNextJoin = true;
         } else if (resetOnNextJoin) {
-            EspTargetStorage.setGlobalEspEnabled(false);
+            EspStorageManager.setGlobalEspEnabled(false);
             resetOnNextJoin = false;
         }
 
@@ -71,8 +71,8 @@ public class KeyMappingManager {
         }
 
         while (TOGGLE_GLOBAL_ESP_KEY.consumeClick()) {
-            boolean enabled = !EspTargetStorage.isGlobalEspEnabled();
-            EspTargetStorage.setGlobalEspEnabled(enabled);
+            boolean enabled = !EspStorageManager.isGlobalEspEnabled();
+            EspStorageManager.setGlobalEspEnabled(enabled);
 
             if (client.player != null) {
                 Component text = Component.literal("ESP:")
