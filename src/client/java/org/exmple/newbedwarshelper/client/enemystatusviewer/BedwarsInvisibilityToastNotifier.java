@@ -19,7 +19,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.scores.PlayerTeam;
 import org.exmple.newbedwarshelper.client.gui.MultilineSystemToast;
-import org.exmple.newbedwarshelper.client.mixin.client.EntitySharedFlagAccessor;
+import org.exmple.newbedwarshelper.client.mixin.enemystatusviewer.EntitySharedFlagAccessor;
 import org.exmple.newbedwarshelper.client.utils.bedwars.BedwarsGameDetector;
 import org.exmple.newbedwarshelper.client.utils.bedwars.BedwarsTeamMarker;
 

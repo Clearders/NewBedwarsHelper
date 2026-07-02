@@ -1,11 +1,11 @@
 {
   "required": false,
   "minVersion": "0.8",
-  "package": "org.exmple.newbedwarshelper.client.mixin.client",
+  "package": "org.exmple.newbedwarshelper.client.mixin",
   "compatibilityLevel": "JAVA_25",
   "plugin": "org.exmple.newbedwarshelper.client.mixin.NewbedwarshelperMixinPlugin",
   "client": [
-    "IrisCommonUniformsMixin"
+    "gammaoverride.IrisCommonUniformsMixin"
   ],
   "injectors": {
     "defaultRequire": 0
