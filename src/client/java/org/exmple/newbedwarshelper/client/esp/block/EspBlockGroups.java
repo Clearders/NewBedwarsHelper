@@ -5,7 +5,9 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public final class EspBlockGroups {
     public static final EspBlockGroup ORES = new EspBlockGroup("ores", "screen.newbedwarshelper.esp_whitelist.block.group.ores", OresTargets.create());
@@ -22,6 +24,8 @@ public final class EspBlockGroups {
             FUNCTIONAL_BLOCKS,
             MISC
     );
+    public static final List<EspBlockTarget> ALL_TARGETS = createAllTargets();
+    private static final Map<Block, EspBlockTarget> TARGET_BY_BLOCK = createTargetByBlock();
 
     private EspBlockGroups() {
     }
@@ -32,6 +36,28 @@ public final class EspBlockGroups {
             blocks.add(BuiltInRegistries.BLOCK.getValue(Identifier.fromNamespaceAndPath("minecraft", blockId)));
         }
         return new EspBlockTarget(id, "block_target.newbedwarshelper." + id, List.copyOf(blocks), colorMode);
+    }
+
+    public static EspBlockTarget targetForBlock(Block block) {
+        return TARGET_BY_BLOCK.get(block);
+    }
+
+    private static List<EspBlockTarget> createAllTargets() {
+        List<EspBlockTarget> targets = new ArrayList<>();
+        for (EspBlockGroup group : ALL) {
+            targets.addAll(group.targets());
+        }
+        return List.copyOf(targets);
+    }
+
+    private static Map<Block, EspBlockTarget> createTargetByBlock() {
+        Map<Block, EspBlockTarget> targetsByBlock = new HashMap<>();
+        for (EspBlockTarget target : ALL_TARGETS) {
+            for (Block block : target.blocks()) {
+                targetsByBlock.put(block, target);
+            }
+        }
+        return Map.copyOf(targetsByBlock);
     }
 
     private static final class OresTargets {

@@ -2,6 +2,7 @@ package org.exmple.newbedwarshelper.client.esp;
 
 import org.exmple.newbedwarshelper.client.esp.blockentity.EspBlockEntityStorage;
 import org.exmple.newbedwarshelper.client.esp.block.EspBlockStorage;
+import org.exmple.newbedwarshelper.client.esp.block.render.EspBlockEspController;
 import org.exmple.newbedwarshelper.client.esp.entity.EspEntityStorage;
 
 public final class EspStorageManager {
@@ -12,6 +13,7 @@ public final class EspStorageManager {
         EspEntityStorage.init();
         EspBlockEntityStorage.init();
         EspBlockStorage.init();
+        EspBlockEspController.init();
     }
 
     public static synchronized void clearTemporaryOverrides() {
@@ -24,6 +26,10 @@ public final class EspStorageManager {
         EspEntityStorage.resetWhitelistToDefaults();
         EspBlockEntityStorage.resetWhitelistToDefaults();
         EspBlockStorage.resetWhitelistToDefaults();
+    }
+
+    public static synchronized void clearRuntimeCaches() {
+        EspBlockEspController.clear();
     }
 
     public static synchronized boolean isGlobalEspEnabled() {

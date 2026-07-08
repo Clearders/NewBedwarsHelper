@@ -1,0 +1,69 @@
+package org.exmple.newbedwarshelper.client.gui;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.CycleButton;
+import net.minecraft.client.gui.components.StringWidget;
+import net.minecraft.client.gui.layouts.FrameLayout;
+import net.minecraft.client.gui.layouts.GridLayout;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+import org.exmple.newbedwarshelper.client.z_config.ModConfig;
+
+public class BlockEspConfigScreen extends Screen {
+    private static final Component TITLE = Component.translatable("screen.newbedwarshelper.block_esp.title");
+    private static final Component TRACER_ON_TEXT = Component.translatable("screen.newbedwarshelper.block_esp.tracer.on");
+    private static final Component TRACER_OFF_TEXT = Component.translatable("screen.newbedwarshelper.block_esp.tracer.off");
+    private static final Component DONE_TEXT = Component.translatable("screen.newbedwarshelper.block_esp.done");
+    private static final int BUTTON_WIDTH = 180;
+
+    private final Screen parent;
+
+    public BlockEspConfigScreen(Minecraft minecraft, Screen parent) {
+        super(minecraft, minecraft.font, TITLE);
+        this.parent = parent;
+    }
+
+    @Override
+    protected void init() {
+        GridLayout gridLayout = new GridLayout();
+        gridLayout.defaultCellSetting().padding(4, 4, 4, 0);
+        GridLayout.RowHelper helper = gridLayout.createRowHelper(2);
+        helper.addChild(createTracerButton(), gridLayout.newCellSettings().paddingTop(50));
+        helper.addChild(Button.builder(DONE_TEXT, button -> this.onClose())
+                .width(BUTTON_WIDTH)
+                .build(), 2, gridLayout.newCellSettings().alignHorizontallyCenter());
+        gridLayout.arrangeElements();
+        FrameLayout.alignInRectangle(gridLayout, 0, 0, this.width, this.height, 0.5F, 0.25F);
+        gridLayout.visitWidgets(this::addRenderableWidget);
+
+        int textWidth = this.font.width(this.title);
+        this.addRenderableWidget(new StringWidget(this.width / 2 - textWidth / 2, 40, textWidth, 9, this.title, this.font));
+    }
+
+    @Override
+    public void onClose() {
+        this.minecraft.gui.setScreen(this.parent);
+    }
+
+    private static CycleButton<Boolean> createTracerButton() {
+        CycleButton<Boolean> button = CycleButton.builder(BlockEspConfigScreen::tracerText, isTracerEnabled())
+                .withValues(Boolean.TRUE, Boolean.FALSE)
+                .displayOnlyValue()
+                .create(Component.empty(), (cycleButton, enabled) -> {
+                    ModConfig config = ModConfig.getInstance();
+                    config.esp.showBlockEspTracer = enabled;
+                    config.save();
+                });
+        button.setWidth(BUTTON_WIDTH);
+        return button;
+    }
+
+    private static boolean isTracerEnabled() {
+        return Boolean.TRUE.equals(ModConfig.getInstance().esp.showBlockEspTracer);
+    }
+
+    private static Component tracerText(boolean enabled) {
+        return enabled ? TRACER_ON_TEXT : TRACER_OFF_TEXT;
+    }
+}

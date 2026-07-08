@@ -113,6 +113,7 @@ public class ModConfig {
         public Map<String, Boolean> blockEntityWhitelist = new LinkedHashMap<>();
         public Map<String, Boolean> blockWhitelist = new LinkedHashMap<>();
         public boolean dangerousWitherSkullWhitelist = false;
+        public Boolean showBlockEspTracer = true;
 
         private void ensureDefaults() {
             if (entityWhitelist == null) {
@@ -123,6 +124,9 @@ public class ModConfig {
             }
             if (blockWhitelist == null) {
                 blockWhitelist = new LinkedHashMap<>();
+            }
+            if (showBlockEspTracer == null) {
+                showBlockEspTracer = true;
             }
         }
     }

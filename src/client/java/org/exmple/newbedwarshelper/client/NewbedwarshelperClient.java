@@ -40,6 +40,7 @@ public class NewbedwarshelperClient implements ClientModInitializer {
         ImeCommand.register();
         ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {
             EspStorageManager.clearTemporaryOverrides();
+            EspStorageManager.clearRuntimeCaches();
             HitboxEnhanceTargetStorage.clearTemporaryOverrides();
             IspTargetStorage.clearTemporaryOverrides();
             AsyncExecutor.shutdown();

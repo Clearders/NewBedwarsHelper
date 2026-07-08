@@ -5,6 +5,9 @@
   "compatibilityLevel": "JAVA_25",
   "client": [
     "esp.blockentity.ChestOutlineMixin",
+    "esp.block.ClientPacketListenerBlockEspChunkMixin",
+    "esp.block.GameRendererBlockEspMixin",
+    "esp.block.LevelChunkBlockEspUpdateMixin",
     "enemystatusviewer.ClientPacketListenerMobEffectMixin",
     "esp.entity.EntityAppearGlowingMixin",
     "esp.entity.EntityOutlineColorMixin",

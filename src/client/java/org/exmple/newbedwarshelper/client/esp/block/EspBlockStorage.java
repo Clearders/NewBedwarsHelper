@@ -5,6 +5,7 @@ import org.exmple.newbedwarshelper.client.esp.EspGlobalState;
 import org.exmple.newbedwarshelper.client.esp.EspTargetWhitelist;
 import org.exmple.newbedwarshelper.client.esp.EspTempToggleMode;
 import org.exmple.newbedwarshelper.client.esp.EspToggleAction;
+import org.exmple.newbedwarshelper.client.esp.block.render.EspBlockEspController;
 import org.exmple.newbedwarshelper.client.z_config.ModConfig;
 
 import java.util.LinkedHashMap;
@@ -39,12 +40,18 @@ public final class EspBlockStorage {
 
     public static synchronized EspBlockTarget targetForBlock(Block block) {
         init();
+        EspBlockTarget target = EspBlockGroups.targetForBlock(block);
+        return target != null && BLOCK_TARGETS.isEnabled(target) ? target : null;
+    }
+
+    public static synchronized boolean hasAnyEnabledBlockTarget() {
+        init();
         for (EspBlockTarget target : BLOCK_TARGETS.persistentTargetKeys()) {
-            if (target.blocks().contains(block) && BLOCK_TARGETS.isEnabled(target)) {
-                return target;
+            if (BLOCK_TARGETS.isEnabled(target)) {
+                return true;
             }
         }
-        return null;
+        return false;
     }
 
     public static synchronized boolean isBlockTargetEspEnabled(EspBlockTarget target) {
@@ -61,12 +68,14 @@ public final class EspBlockStorage {
         init();
         BLOCK_TARGETS.setEnabled(target, enabled);
         saveWhitelistToDisk();
+        EspBlockEspController.requestRescan();
     }
 
     public static synchronized void setBlockTargetsEspEnabled(List<EspBlockTarget> targets, boolean enabled) {
         init();
         BLOCK_TARGETS.setAllEnabled(targets, enabled);
         saveWhitelistToDisk();
+        EspBlockEspController.requestRescan();
     }
 
     public static synchronized EspToggleAction getNextBlockGroupToggleAction(List<EspBlockTarget> targets) {
@@ -78,6 +87,7 @@ public final class EspBlockStorage {
         init();
         BLOCK_TARGETS.applyNextGroupToggleAction(targets);
         saveWhitelistToDisk();
+        EspBlockEspController.requestRescan();
     }
 
     public static synchronized EspTempToggleMode getBlockGroupTempToggleMode(List<EspBlockTarget> targets) {
@@ -88,16 +98,19 @@ public final class EspBlockStorage {
     public static synchronized void cycleBlockGroupTempToggleMode(List<EspBlockTarget> targets) {
         init();
         BLOCK_TARGETS.cycleGroupTempToggleMode(targets);
+        EspBlockEspController.requestRescan();
     }
 
     public static synchronized void clearTemporaryOverrides() {
         BLOCK_TARGETS.clearTemporaryOverrides();
+        EspBlockEspController.requestRescan();
     }
 
     public static synchronized void resetWhitelistToDefaults() {
         init();
         BLOCK_TARGETS.resetToDefaults();
         saveWhitelistToDisk();
+        EspBlockEspController.requestRescan();
     }
 
     private static Map<EspBlockTarget, Boolean> createDefaultBlockWhitelist() {
