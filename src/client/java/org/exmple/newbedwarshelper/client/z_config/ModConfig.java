@@ -114,6 +114,7 @@ public class ModConfig {
         public Map<String, Boolean> blockWhitelist = new LinkedHashMap<>();
         public boolean dangerousWitherSkullWhitelist = false;
         public Boolean showBlockEspTracer = true;
+        public Boolean showPlayerModelsThroughWalls = false;
 
         private void ensureDefaults() {
             if (entityWhitelist == null) {
@@ -127,6 +128,9 @@ public class ModConfig {
             }
             if (showBlockEspTracer == null) {
                 showBlockEspTracer = true;
+            }
+            if (showPlayerModelsThroughWalls == null) {
+                showPlayerModelsThroughWalls = false;
             }
         }
     }

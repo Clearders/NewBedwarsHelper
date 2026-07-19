@@ -11,6 +11,7 @@
     "enemystatusviewer.ClientPacketListenerMobEffectMixin",
     "esp.entity.EntityAppearGlowingMixin",
     "esp.entity.EntityOutlineColorMixin",
+    "esp.entity.player.LevelRendererPlayerThroughWallMixin",
     "enemystatusviewer.EntitySharedFlagAccessor",
     "antiafk.GuiAntiAfkHudMixin",
     "enemystatusviewer.GuiScoreboardSidebarRenderMixin",

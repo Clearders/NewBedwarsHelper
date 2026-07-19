@@ -19,6 +19,8 @@
   "screen.newbedwarshelper.misc.anti_afk": "AntiAFK Config",
   "screen.newbedwarshelper.misc.gamma_override": "Gamma Override Config",
   "screen.newbedwarshelper.misc.block_esp": "Block ESP Config",
+  "screen.newbedwarshelper.misc.player_through_wall.on": "Player X-Ray: ON",
+  "screen.newbedwarshelper.misc.player_through_wall.off": "Player X-Ray: OFF",
   "screen.newbedwarshelper.misc.done": "Done",
   "screen.newbedwarshelper.anti_afk.title": "AntiAFK Config",
   "screen.newbedwarshelper.anti_afk.feature.enabled": "AntiAFK Feature: Enabled",

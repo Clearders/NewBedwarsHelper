@@ -7,6 +7,7 @@ import net.minecraft.client.gui.layouts.FrameLayout;
 import net.minecraft.client.gui.layouts.GridLayout;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import org.exmple.newbedwarshelper.client.esp.entity.player.PlayerThroughWallEsp;
 
 public class MiscConfigScreen extends Screen {
     private static final Component TITLE = Component.translatable("screen.newbedwarshelper.misc.title");
@@ -37,6 +38,12 @@ public class MiscConfigScreen extends Screen {
         helper.addChild(Button.builder(BLOCK_ESP_CONFIG_TEXT, button -> this.minecraft.gui.setScreen(new BlockEspConfigScreen(this.minecraft, this)))
                 .width(BUTTON_WIDTH)
                 .build(), gridLayout.newCellSettings().paddingTop(5));
+        helper.addChild(Button.builder(playerThroughWallText(), button -> {
+                    PlayerThroughWallEsp.setConfiguredEnabled(!PlayerThroughWallEsp.isConfiguredEnabled());
+                    button.setMessage(playerThroughWallText());
+                })
+                .width(BUTTON_WIDTH)
+                .build(), gridLayout.newCellSettings().paddingTop(5));
         helper.addChild(Button.builder(DONE_TEXT, button -> this.onClose())
                 .width(BUTTON_WIDTH)
                 .build(), 2, gridLayout.newCellSettings().alignHorizontallyCenter());
@@ -51,5 +58,11 @@ public class MiscConfigScreen extends Screen {
     @Override
     public void onClose() {
         this.minecraft.gui.setScreen(this.parent);
+    }
+
+    private static Component playerThroughWallText() {
+        return Component.translatable(PlayerThroughWallEsp.isConfiguredEnabled()
+                ? "screen.newbedwarshelper.misc.player_through_wall.on"
+                : "screen.newbedwarshelper.misc.player_through_wall.off");
     }
 }

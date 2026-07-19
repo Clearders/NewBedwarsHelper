@@ -19,6 +19,8 @@
   "screen.newbedwarshelper.misc.anti_afk": "防AFK配置",
   "screen.newbedwarshelper.misc.gamma_override": "伽马覆写配置",
   "screen.newbedwarshelper.misc.block_esp": "普通方块ESP配置",
+  "screen.newbedwarshelper.misc.player_through_wall.on": "玩家模型透视：开启",
+  "screen.newbedwarshelper.misc.player_through_wall.off": "玩家模型透视：关闭",
   "screen.newbedwarshelper.misc.done": "完成",
   "screen.newbedwarshelper.anti_afk.title": "防AFK配置",
   "screen.newbedwarshelper.anti_afk.feature.enabled": "防AFK功能:启用",
