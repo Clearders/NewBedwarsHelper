@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "newbedwarshelper",
+  "version": "${version}",
+  "name": "NewBedwarsHelper",
+  "description": "",
+  "authors": [],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/newbedwarshelper/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "fabric-datagen": [
+      "org.exmple.newbedwarshelper.client.NewbedwarshelperDataGenerator"
+    ],
+    "client": [
+      "org.exmple.newbedwarshelper.client.NewbedwarshelperClient"
+    ],
+    "main": [
+      "org.exmple.newbedwarshelper.Newbedwarshelper"
+    ]
+  },
+  "mixins": [
+    "newbedwarshelper.mixins.json",
+    {
+      "config": "newbedwarshelper.client.mixins.json",
+      "environment": "client"
+    },
+    {
+      "config": "newbedwarshelper.iris.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}

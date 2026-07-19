@@ -1,0 +1,37 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "org.exmple.newbedwarshelper.client.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "client": [
+    "esp.blockentity.ChestOutlineMixin",
+    "esp.block.ClientPacketListenerBlockEspChunkMixin",
+    "esp.block.GameRendererBlockEspMixin",
+    "esp.block.LevelChunkBlockEspUpdateMixin",
+    "enemystatusviewer.ClientPacketListenerMobEffectMixin",
+    "esp.entity.EntityAppearGlowingMixin",
+    "esp.entity.EntityOutlineColorMixin",
+    "enemystatusviewer.EntitySharedFlagAccessor",
+    "antiafk.GuiAntiAfkHudMixin",
+    "enemystatusviewer.GuiScoreboardSidebarRenderMixin",
+    "statuseffecttimer.GuiStatusEffectTimerMixin",
+    "hitboxenhance.HitboxEnhanceDebugRendererMixin",
+    "itemmodelenhance.ItemEntityRendererScaleMixin",
+    "esp.entity.ItemEntityOutlineMixin",
+    "itemmodelenhance.ItemEntityRenderStateScaleMixin",
+    "isp.IspEntityInvisibilityMixin",
+    "esp.blockentity.LevelRendererChestOutlineMixin",
+    "fireballhelper.LevelRendererFireballHelperMixin",
+    "gammaoverride.LightmapRenderStateExtractorMixin",
+    "enemystatusviewer.PlayerTeamSidebarProtectionMixin",
+    "esp.blockentity.ShulkerBoxOutlineMixin",
+    "esp.entity.WindChargeOutlineMixin",
+    "esp.entity.WitherSkullOutlineMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}
