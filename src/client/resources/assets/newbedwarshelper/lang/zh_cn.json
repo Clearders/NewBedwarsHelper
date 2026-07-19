@@ -287,6 +287,7 @@
   "key.newbedwarshelper.toggle_global_esp": "切换全局 ESP",
   "key.newbedwarshelper.toggle_anti_afk": "切换防AFK",
   "key.newbedwarshelper.toggle_gamma_override": "切换伽马覆写",
+  "key.newbedwarshelper.open_block_entity_classification_debugger": "打开方块实体分类调试器",
   "key.category.newbedwarshelper.bed_wars_helper": "NewBedwarsHelper",
   "overlay.newbedwarshelper.esp.on": "开",
   "overlay.newbedwarshelper.esp.off": "关",

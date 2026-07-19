@@ -287,6 +287,7 @@
   "key.newbedwarshelper.toggle_global_esp": "Toggle Global ESP",
   "key.newbedwarshelper.toggle_anti_afk": "Toggle Anti-AFK",
   "key.newbedwarshelper.toggle_gamma_override": "Toggle Gamma Override",
+  "key.newbedwarshelper.open_block_entity_classification_debugger": "Open Block Entity Classification Debugger",
   "key.category.newbedwarshelper.bed_wars_helper": "NewBedwarsHelper",
   "overlay.newbedwarshelper.esp.on": "ON",
   "overlay.newbedwarshelper.esp.off": "OFF",
